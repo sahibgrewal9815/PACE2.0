@@ -1,0 +1,17 @@
+{
+  "name": "PACE — Discipline Engine",
+  "short_name": "PACE",
+  "description": "Progress. Activity. Consistency. Energy.",
+  "start_url": "/PACE2.0/",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#080808",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%23080808'/><text x='50%' y='58%' font-size='80' font-weight='900' font-family='Arial' fill='%23FF5500' text-anchor='middle' dominant-baseline='middle'>P</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}

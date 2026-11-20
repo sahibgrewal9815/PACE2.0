@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>PACE — Progress. Activity. Consistency. Energy.</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#080808">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080808;
+    --bg2: #0f0f0f;
+    --glass: rgba(255,255,255,0.05);
+    --glass2: rgba(255,255,255,0.08);
+    --border: rgba(255,255,255,0.08);
+    --acc: #FF5500;
+    --acc2: #FF8C00;
+    --text: #ffffff;
+    --text2: rgba(255,255,255,0.6);
+    --text3: rgba(255,255,255,0.3);
+    --green: #22c55e;
+    --radius: 20px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    min-height: 100dvh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── SCREENS ── */
+  .screen {
+    display: none;
+    min-height: 100dvh;
+    padding-top: calc(var(--safe-top) + 16px);
+    padding-bottom: calc(var(--safe-bottom) + 24px);
+    padding-left: 24px;
+    padding-right: 24px;
+    animation: fadeUp 0.4s ease;
+  }
+  .screen.active { display: flex; flex-direction: column; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SPLASH ── */
+  #screen-splash {
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 50% 60%, rgba(255,85,0,0.15) 0%, transparent 70%);
+  }
+  .splash-logo {
+    font-size: 72px;
+    font-weight: 900;
+    letter-spacing: -4px;
+    background: linear-gradient(135deg, #FF5500, #FF8C00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .splash-tagline {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    color: var(--text3);
+    text-transform: uppercase;
+    margin-top: 8px;
+    text-align: center;
+  }
+  .splash-btn {
+    margin-top: 60px;
+    width: 100%;
+    max-width: 320px;
+  }
+
+  /* ── ONBOARDING HEADER ── */
+  .onb-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+  .back-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--text2);
+    font-size: 18px;
+  }
+  .step-pill {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+  }
+  .skip-btn {
+    font-size: 13px;
+    color: var(--text3);
+    cursor: pointer;
+    padding: 8px;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    height: 3px;
+    background: var(--glass2);
+    border-radius: 10px;
+    margin-bottom: 36px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FF5500, #FF8C00);
+    border-radius: 10px;
+    transition: width 0.4s ease;
+  }
+
+  /* ── BIG QUESTION ── */
+  .question-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--acc);
+    margin-bottom: 12px;
+  }
+  .question-title {
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .question-sub {
+    font-size: 14px;
+    color: var(--text2);
+    margin-bottom: 32px;
+    line-height: 1.6;
+  }
+
+  /* ── OPTION CARDS ── */
+  .options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+  }
+  .option-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    background: var(--glass);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .option-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,85,0,0.08), transparent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .option-card.selected {
+    border-color: var(--acc);
+    background: rgba(255,85,0,0.08);
+  }
+  .option-card.selected::before { opacity: 1; }
+  .option-emoji { font-size: 22px; flex-shrink: 0; }
+  .option-text {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .option-check {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .option-card.selected .option-check {
+    background: var(--acc);
+    border-color: var(--acc);
+    color: white;
+  }
+
+  /* ── INPUTS ── */
+  .input-group {
+    margin-bottom: 16px;
+  }
+  .input-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .input-field {
+    width: 100%;
+    padding: 16px 18px;
+    background: var(--glass);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    color: var(--text);
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  .input-field::placeholder { color: var(--text3); }
+  .input-field:focus { border-color: var(--acc); }
+  .input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  /* OTP inputs */
+  .otp-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 24px 0;
+  }
+  .otp-input {
+    width: 52px; height: 60px;
+    background: var(--glass);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    color: var(--text);
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  .otp-input:focus { border-color: var(--acc); }
+
+  /* ── BUTTONS ── */
+  .btn-primary {
+    width: 100%;
+    padding: 17px;
+    background: linear-gradient(135deg, #FF5500, #FF8C00);
+    border: none;
+    border-radius: 16px;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 8px 32px rgba(255,85,0,0.3);
+    letter-spacing: 0.3px;
+  }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-ghost {
+    width: 100%;
+    padding: 17px;
+    background: var(--glass);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    color: var(--text2);
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-wrap {
+    margin-top: auto;
+    padding-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* ── GLOW CARD ── */
+  .glow-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .glow-card::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: 50%;
+    transform: translateX(-50%);
+    width: 60%; height: 80px;
+    background: radial-gradient(ellipse, rgba(255,85,0,0.3), transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ── PAYMENT SCREEN ── */
+  .qr-box {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+  }
+  .qr-box img { width: 100%; max-width: 220px; border-radius: 10px; }
+  .qr-placeholder {
+    width: 220px; height: 220px;
+    background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    color: #999;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .amount-badge {
+    text-align: center;
+    margin: 12px 0 20px;
+  }
+  .amount-badge .amount {
+    font-size: 36px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #FF5500, #FF8C00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .amount-badge .label {
+    font-size: 12px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  .upload-box {
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 16px;
+  }
+  .upload-box:hover, .upload-box.has-file {
+    border-color: var(--acc);
+    background: rgba(255,85,0,0.05);
+  }
+  .upload-icon { font-size: 32px; margin-bottom: 8px; }
+  .upload-text { font-size: 14px; color: var(--text2); }
+  .upload-text strong { color: var(--text); display: block; margin-bottom: 4px; }
+
+  /* ── SUCCESS SCREEN ── */
+  #screen-success {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: radial-gradient(ellipse at 50% 40%, rgba(255,85,0,0.12) 0%, transparent 65%);
+  }
+  .success-icon {
+    width: 90px; height: 90px;
+    background: linear-gradient(135deg, rgba(255,85,0,0.2), rgba(255,140,0,0.1));
+    border: 1px solid rgba(255,85,0,0.3);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px;
+    margin: 0 auto 24px;
+    box-shadow: 0 0 60px rgba(255,85,0,0.2);
+  }
+  .success-title {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+  }
+  .success-sub {
+    font-size: 15px;
+    color: var(--text2);
+    line-height: 1.6;
+    max-width: 280px;
+    margin: 0 auto 32px;
+  }
+  .info-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 20px;
+    text-align: left;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-row .key { color: var(--text2); }
+  .info-row .val { font-weight: 600; color: var(--text); }
+
+  /* ── LOGIN SCREEN ── */
+  #screen-login {
+    justify-content: center;
+  }
+  .login-logo {
+    font-size: 48px;
+    font-weight: 900;
+    letter-spacing: -2px;
+    background: linear-gradient(135deg, #FF5500, #FF8C00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .login-sub {
+    font-size: 12px;
+    color: var(--text3);
+    text-align: center;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 40px;
+  }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    top: calc(var(--safe-top) + 60px);
+    left: 50%; transform: translateX(-50%);
+    background: rgba(20,20,20,0.95);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+    backdrop-filter: blur(20px);
+  }
+  .toast.show { opacity: 1; }
+  .toast.error { border-color: #ef4444; color: #ef4444; }
+  .toast.success { border-color: var(--green); color: var(--green); }
+
+  /* ── LOADING ── */
+  .loader {
+    display: inline-block;
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── SCROLLABLE CONTENT ── */
+  .scroll-content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .scroll-content::-webkit-scrollbar { display: none; }
+
+  /* Divider */
+  .divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 20px 0;
+    color: var(--text3);
+    font-size: 12px;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Note box */
+  .note-box {
+    background: rgba(255,85,0,0.06);
+    border: 1px solid rgba(255,85,0,0.2);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  .note-box strong { color: var(--acc); }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════════════════════════════
+     SCREEN: SPLASH
+══════════════════════════════════════ -->
+<div class="screen active" id="screen-splash">
+  <div style="text-align:center;">
+    <div class="splash-logo">PACE</div>
+    <div class="splash-tagline">Progress · Activity · Consistency · Energy</div>
+  </div>
+  <div class="splash-btn">
+    <button class="btn-primary" onclick="goTo('screen-s1')">Get Started →</button>
+    <div class="divider">already have an account</div>
+    <button class="btn-ghost" onclick="goTo('screen-login')">Log In</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN: S1 — Name & Contact
+══════════════════════════════════════ -->
+<div class="screen" id="screen-s1">
+  <div class="onb-header">
+    <div class="back-btn" onclick="goTo('screen-splash')">←</div>
+    <div class="step-pill">1 of 7</div>
+    <div style="width:40px"></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" style="width:14%"></div></div>
+
+  <div class="question-label">Let's start</div>
+  <div class="question-title">What should we call you?</div>
+  <div class="question-sub">Your basic details to get you set up.</div>
+
+  <div class="scroll-content">
+    <div class="input-group">
+      <label class="input-label">Full Name</label>
+      <input class="input-field" type="text" id="inp-name" placeholder="e.g. Arjun Singh" autocomplete="name">
+    </div>
+    <div class="input-group">
+      <label class="input-label">Phone Number</label>
+      <input class="input-field" type="tel" id="inp-phone" placeholder="+91 98765 43210" autocomplete="tel">
+    </div>
+    <div class="input-group">
+      <label class="input-label">Email Address</label>
+      <input class="input-field" type="email" id="inp-email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="input-row">
+      <div class="input-group">
+        <label class="input-label">Age</label>
+        <input class="input-field" type="number" id="inp-age" placeholder="25" min="13" max="80">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Gender</label>
+        <select class="input-field" id="inp-gender">
+          <option value="" disabled selected>Select</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-wrap">
+    <button class="btn-primary" onclick="validateS1()">Continue →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN: S2 — Goal
+══════════════════════════════════════ -->
+<div class="screen" id="screen-s2">
+  <div class="onb-header">
+    <div class="back-btn" onclick="goTo('screen-s1')">←</div>
+    <div class="step-pill">2 of 7</div>
+    <div style="width:40px"></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" style="width:28%"></div></div>
+
+  <div class="question-label">Your Mission</div>
+  <div class="question-title">What's your main goal?</div>
+  <div class="question-sub">We'll build everything around this.</div>
+
+  <div class="options-list">
+    <div class="option-card" onclick="selectOption(this,'goal','weight_loss')">
+      <div class="option-emoji">🔥</div>
+      <div class="option-text">Lose Weight & Burn Fat</div>
+      <div class="option-check">✓</div>
+    </div>
+    <div class="option-card" onclick="selectOption(this,'goal','weight_gain')">
+      <div class="option-emoji">💪</div>
+      <div class="option-text">Build Muscle & Gain Weight</div>
+      <div class="option-check">✓</div>
+    </div>
+    <div class="option-card" onclick="selectOption(this,'goal','body_recomp')">
+      <div class="option-emoji">⚡</div>
+      <div class="option-text">Body Recomposition</div>
+      <div class="option-check">✓</div>
+    </div>
+    <div class="option-card" onclick="selectOption(this,'goal','discipline')">
+      <div class="option-emoji">🧠</div>
+      <div class="option-text">Build Discipline & Healthy Habits</div>
+      <div class="option-check">✓</div>
+    </div>
+    <div class="option-card" onclick="selectOption(this,'goal','performance')">
+      <div class="option-emoji">🏆</div>
+      <div class="option-text">Improve Athletic Performance</div>
+      <div class="option-check">✓</div>
+    </div>
+  </div>
+
+  <div class="btn-wrap">
+    <button class="btn-primary" onclick="validateOption('goal','screen-s3')">Continue →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN: S3 — Body Stats
+══════════════════════════════════════ -->
+<div class="screen" id="screen-s3">
+  <div class="onb-header">
+    <div class="back-btn" onclick="goTo('screen-s2')">←</div>
+    <div class="step-pill">3 of 7</div>
+    <div style="width:40px"></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" style="width:42%"></div></div>
+
+  <div class="question-label">Your Body</div>
+  <div class="question-title">Current stats & target</div>
+  <div class="question-sub">Be honest — this is how we build your personal plan.</div>
+
+  <div class="scroll-content">
+    <div class="input-row">
+      <div class="input-group">
+        <label class="input-label">Current Weight (kg)</label>
+        <input class="input-field" type="number" id="inp-current-weight" placeholder="75" min="30" max="300" step="0.1">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Target Weight (kg)</label>
+        <input class="input-field" type="number" id="inp-target-weight" placeholder="68" min="30" max="300" step="0.1">
+      </div>
+    </div>
+    <div class="input-group">
+      <label class="input-label">Height (cm)</label>
+      <input class="input-field" type="number" id="inp-height" placeholder="175" min="120" max="250">
+    </div>
+    <div class="note-box">
+      <strong>Why we ask this →</strong> Your trainer uses these numbers to calculate your exact calorie targets, macros, and workout intensity.
+    </div>
+  </div>
+
+  <div class="btn-wrap">
+    <button class="btn-primary" onclick="validateS3()">Continue →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN: S4 — Workout Preference
+══════════════════════════════════════ -->
+<div class="screen" id="screen-s4">
+  <div class="onb-header">
+    <div class="back-btn" onclick="goTo('screen-s3')">←</div>
+    <div class="step-pill">4 of 7</div>
+    <div style="width:40px"></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" style="width:57%"></div></div>
+
+  <div class="question-label">Training Style</div>
+  <div class="question-title">Where do you prefer to train?</div>
+  <div class="question-sub">Your plan will be built around your setup.</div>
+
+  <div class="options-list">
+    <div class="option-card" onclick="selectOption(this,'workout_location','gym')">
+      <div class="option-emoji">🏋️</div>
+      <div class="option-text">Gym — Full equipment access</div>
+      <div class="option-check">✓</div>
+    </div>
+    <div class="option-card" onclick="selectOption(this,'workout_location','home')">
+      <div class="option-emoji">🏠</div>
+      <div class="option-text">Home — Minimal or no equipment</div>
+      <div class="option-check">✓</div>
+    </div>
+    <div class="option-card" onclick="selectOption(this,'workout_location','both')">
+      <div class="option-emoji">🔄</div>
+      <div class="option-text">Both — Mix of gym & home</div>
+      <div class="option-check">✓</div>
+    </div>
+    <div class="option-card" onclick="selectOption(this,'workout_location','outdoor')">
+      <div class="option-emoji">🌳</div>
+      <div class="option-text">Outdoor — Running, calisthenics</div>
+      <div class="option-check">✓</div>
+    </div>
+  </div>
+
+  <div class="btn-wrap">
+    <button class="btn-primary" onclick="validateOption('workout_location','screen-s5')">Continue →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN: S5 — Diet Preference
+══════════════════════════════════════ -->
+<div class="screen" id="screen-s5">
+  <div class="onb-header">
+    <div class="back-btn" onclick="goTo('screen-s4')">←</div>
+    <div class="step-pill">5 of 7</div>
+    <div style="width:40px"></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" style="width:71%"></div></div>
+
+  <div class="question-label">Your Diet</div>
+  <div class="question-title">What do you eat?</div>
+  <div class="question-sub">Your nutrition plan will match your preferences.</div>
+
+  <div class="options-list">
+    <div class="option-card" onclick="selectOption(this,'diet_preference','non_veg')">
+      <div class="option-emoji">🍗</div>
+      <div class="option-text">Non-Vegetarian — Chicken, eggs, fish</div>
+      <div class="option-check">✓</div>
+    </div>
+    <div class="option-card" onclick="selectOption(this,'diet_preference','veg')">
+      <div class="option-emoji">🥦</div>
+      <div class="option-text">Vegetarian — No meat or eggs</div>
+      <div class="option-check">✓</div>
+    </div>
+    <div class="option-card" onclick="selectOption(this,'diet_preference','eggetarian')">
+      <div class="option-emoji">🥚</div>
+      <div class="option-text">Eggetarian — Veg + eggs</div>
+      <div class="option-check">✓</div>
+    </div>
+    <div class="option-card" onclick="selectOption(this,'diet_preference','vegan')">
+      <div class="option-emoji">🌱</div>
+      <div class="option-text">Vegan — Plant-based only</div>
+      <div class="option-check">✓</div>
+    </div>
+  </div>
+
+  <div class="btn-wrap">
+    <button class="btn-primary" onclick="validateOption('diet_preference','screen-s6')">Continue →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN: S6 — Body Photo (optional)
+══════════════════════════════════════ -->
+<div class="screen" id="screen-s6">
+  <div class="onb-header">
+    <div class="back-btn" onclick="goTo('screen-s5')">←</div>
+    <div class="step-pill">6 of 7</div>
+    <div style="width:40px"></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" style="width:85%"></div></div>
+
+  <div class="question-label">Optional</div>
+  <div class="question-title">Share your current physique</div>
+  <div class="question-sub">Your trainer will use this to understand your starting point. This is completely private.</div>
+
+  <div class="upload-box" id="photo-upload-box" onclick="document.getElementById('body-photo-input').click()">
+    <div class="upload-icon">📸</div>
+    <div class="upload-text">
+      <strong>Tap to upload a photo</strong>
+      Front or side pose works best
+    </div>
+  </div>
+  <input type="file" id="body-photo-input" accept="image/*" style="display:none" onchange="handleBodyPhoto(this)">
+
+  <div class="note-box">
+    <strong>🔒 Private & secure</strong> — Only your assigned trainer can see this. It's never shared publicly.
+  </div>
+
+  <div class="btn-wrap">
+    <button class="btn-primary" onclick="goTo('screen-s7')">Continue →</button>
+    <button class="btn-ghost" onclick="goTo('screen-s7')">Skip for now</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN: S7 — Payment
+══════════════════════════════════════ -->
+<div class="screen" id="screen-s7">
+  <div class="onb-header">
+    <div class="back-btn" onclick="goTo('screen-s6')">←</div>
+    <div class="step-pill">7 of 7</div>
+    <div style="width:40px"></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+
+  <div class="question-label">Last Step</div>
+  <div class="question-title">Complete your enrollment</div>
+
+  <div class="scroll-content">
+    <div class="amount-badge">
+      <div class="amount">₹999</div>
+      <div class="label">Monthly Membership</div>
+    </div>
+
+    <div class="glow-card" style="margin-bottom:16px; text-align:center;">
+      <div class="qr-box">
+        <div class="qr-placeholder">
+          <div style="font-size:40px">📱</div>
+          <div>Your QR Code here</div>
+          <div style="font-size:11px; color:#bbb">Add QR image in trainer settings</div>
+        </div>
+      </div>
+      <div style="font-size:13px; color:var(--text2); margin-top:8px;">UPI ID: <strong style="color:var(--text)">yourname@upi</strong></div>
+    </div>
+
+    <div class="note-box">
+      <strong>How it works →</strong> Pay the amount above, then upload your payment screenshot below. Your trainer will verify and send your login credentials within <strong>24 hours</strong>.
+    </div>
+
+    <div class="upload-box" id="payment-upload-box" onclick="document.getElementById('payment-input').click()">
+      <div class="upload-icon">🧾</div>
+      <div class="upload-text">
+        <strong>Upload payment screenshot</strong>
+        JPG or PNG of your UPI confirmation
+      </div>
+    </div>
+    <input type="file" id="payment-input" accept="image/*" style="display:none" onchange="handlePaymentPhoto(this)">
+  </div>
+
+  <div class="btn-wrap">
+    <button class="btn-primary" id="submit-btn" onclick="submitSignup()">Submit Application →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN: SUCCESS
+══════════════════════════════════════ -->
+<div class="screen" id="screen-success">
+  <div class="success-icon">⚡</div>
+  <div class="success-title">You're in the queue!</div>
+  <div class="success-sub">Your trainer is reviewing your profile. You'll receive your login credentials via email within 24 hours.</div>
+  <div class="info-card" id="success-info"></div>
+  <div style="margin-top:24px; font-size:13px; color:var(--text3); text-align:center; max-width:260px;">
+    Check your email inbox. Sometimes it goes to spam — add us to contacts!
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN: LOGIN
+══════════════════════════════════════ -->
+<div class="screen" id="screen-login">
+  <div class="login-logo">PACE</div>
+  <div class="login-sub">Progress · Activity · Consistency · Energy</div>
+
+  <div class="input-group">
+    <label class="input-label">Username</label>
+    <input class="input-field" type="text" id="login-username" placeholder="your username" autocomplete="username">
+  </div>
+  <div class="input-group" style="margin-bottom:24px;">
+    <label class="input-label">Password</label>
+    <input class="input-field" type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+  </div>
+
+  <button class="btn-primary" id="login-btn" onclick="doLogin()">Log In →</button>
+
+  <div class="divider" style="margin-top:24px;">new here</div>
+  <button class="btn-ghost" onclick="goTo('screen-s1')">Create Account</button>
+</div>
+
+<script>
+(function(){
+  const SB_URL = 'https://blnqehdnorjvboxcqiap.supabase.co';
+  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsbnFlaGRub3JqdmJveGNxaWFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxNzEzNjUsImV4cCI6MjExMDc0NzM2NX0.gMJ1LuHZ9SpN6_2hsO6XJJXr67qFrOgyM-GRRfziXVs';
+  const H = { 'Content-Type':'application/json', 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` };
+
+  // ── State ──
+  const D = {
+    name:'', phone:'', email:'', age:'', gender:'',
+    goal:'', current_weight:'', target_weight:'', height:'',
+    workout_location:'', diet_preference:'',
+    body_image_url: null, payment_screenshot_url: null
+  };
+  const selections = {};
+
+  // ── Navigation ──
+  window.goTo = function(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0,0);
+  };
+
+  // ── Toast ──
+  function toast(msg, type='') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + type;
+    setTimeout(() => t.className = 'toast', 2800);
+  }
+
+  // ── Option selection ──
+  window.selectOption = function(el, key, val) {
+    el.closest('.options-list').querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selections[key] = val;
+  };
+
+  window.validateOption = function(key, next) {
+    if (!selections[key]) { toast('Please select an option', 'error'); return; }
+    D[key] = selections[key];
+    goTo(next);
+  };
+
+  // ── Step 1 validation ──
+  window.validateS1 = function() {
+    const name = document.getElementById('inp-name').value.trim();
+    const phone = document.getElementById('inp-phone').value.trim();
+    const email = document.getElementById('inp-email').value.trim();
+    const age = document.getElementById('inp-age').value.trim();
+    const gender = document.getElementById('inp-gender').value;
+    if (!name) { toast('Please enter your name', 'error'); return; }
+    if (!phone || phone.length < 10) { toast('Enter a valid phone number', 'error'); return; }
+    if (!email || !email.includes('@')) { toast('Enter a valid email', 'error'); return; }
+    if (!age) { toast('Please enter your age', 'error'); return; }
+    if (!gender) { toast('Please select your gender', 'error'); return; }
+    Object.assign(D, { name, phone, email, age: parseInt(age), gender });
+    goTo('screen-s2');
+  };
+
+  // ── Step 3 validation ──
+  window.validateS3 = function() {
+    const cw = document.getElementById('inp-current-weight').value;
+    const tw = document.getElementById('inp-target-weight').value;
+    const ht = document.getElementById('inp-height').value;
+    if (!cw) { toast('Enter your current weight', 'error'); return; }
+    if (!tw) { toast('Enter your target weight', 'error'); return; }
+    if (!ht) { toast('Enter your height', 'error'); return; }
+    Object.assign(D, { current_weight: parseFloat(cw), target_weight: parseFloat(tw), height: parseFloat(ht) });
+    goTo('screen-s4');
+  };
+
+  // ── File upload helpers ──
+  window.handleBodyPhoto = function(input) {
+    if (input.files[0]) {
+      D._bodyFile = input.files[0];
+      const box = document.getElementById('photo-upload-box');
+      box.classList.add('has-file');
+      box.querySelector('.upload-text strong').textContent = '✅ Photo selected!';
+      box.querySelector('.upload-text').lastChild.textContent = input.files[0].name;
+    }
+  };
+
+  window.handlePaymentPhoto = function(input) {
+    if (input.files[0]) {
+      D._paymentFile = input.files[0];
+      const box = document.getElementById('payment-upload-box');
+      box.classList.add('has-file');
+      box.querySelector('.upload-text strong').textContent = '✅ Screenshot selected!';
+      box.querySelector('.upload-text').lastChild.textContent = input.files[0].name;
+    }
+  };
+
+  // ── Upload file to Supabase storage ──
+  async function uploadFile(file, bucket, path) {
+    const res = await fetch(`${SB_URL}/storage/v1/object/${bucket}/${path}`, {
+      method: 'POST',
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': file.type },
+      body: file
+    });
+    if (!res.ok) return null;
+    return `${SB_URL}/storage/v1/object/public/${bucket}/${path}`;
+  }
+
+  // ── Final submit ──
+  window.submitSignup = function() {
+    if (!D._paymentFile) { toast('Please upload payment screenshot', 'error'); return; }
+    const btn = document.getElementById('submit-btn');
+    btn.innerHTML = '<span class="loader"></span> Submitting...';
+    btn.disabled = true;
+    doSubmit(btn);
+  };
+
+  async function doSubmit(btn) {
+    try {
+      // Upload payment screenshot
+      const ts = Date.now();
+      const paymentUrl = await uploadFile(D._paymentFile, 'payments', `${ts}_${D.phone}.jpg`);
+
+      // Upload body photo if exists
+      let bodyUrl = null;
+      if (D._bodyFile) {
+        bodyUrl = await uploadFile(D._bodyFile, 'body-photos', `${ts}_${D.phone}.jpg`);
+      }
+
+      // Submit signup request
+      const payload = {
+        name: D.name, phone: D.phone, email: D.email,
+        goal: D.goal, current_weight: D.current_weight,
+        target_weight: D.target_weight, height: D.height,
+        age: D.age, gender: D.gender,
+        workout_location: D.workout_location,
+        diet_preference: D.diet_preference,
+        payment_screenshot_url: paymentUrl || 'uploaded',
+        body_image_url: bodyUrl,
+        status: 'payment_submitted'
+      };
+
+      const res = await fetch(`${SB_URL}/rest/v1/signup_requests`, {
+        method: 'POST',
+        headers: { ...H, 'Prefer': 'return=minimal' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) throw new Error('Submit failed');
+
+      // Show success
+      document.getElementById('success-info').innerHTML = `
+        <div class="info-row"><span class="key">Name</span><span class="val">${D.name}</span></div>
+        <div class="info-row"><span class="key">Email</span><span class="val">${D.email}</span></div>
+        <div class="info-row"><span class="key">Goal</span><span class="val">${D.goal.replace('_',' ')}</span></div>
+        <div class="info-row"><span class="key">Status</span><span class="val" style="color:var(--acc)">⏳ Under Review</span></div>
+      `;
+      goTo('screen-success');
+
+    } catch(e) {
+      toast('Something went wrong. Try again.', 'error');
+      btn.innerHTML = 'Submit Application →';
+      btn.disabled = false;
+    }
+  }
+
+  // ── Login ──
+  window.doLogin = async function() {
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value.trim();
+    if (!username || !password) { toast('Enter username and password', 'error'); return; }
+
+    const btn = document.getElementById('login-btn');
+    btn.innerHTML = '<span class="loader"></span> Logging in...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`${SB_URL}/rest/v1/athletes?username=eq.${encodeURIComponent(username)}&password=eq.${encodeURIComponent(password)}&status=eq.active`, {
+        headers: H
+      });
+      const data = await res.json();
+      if (data && data.length > 0) {
+        localStorage.setItem('pace2_session', JSON.stringify(data[0]));
+        window.location.href = 'app.html';
+      } else {
+        toast('Invalid credentials or account not yet activated', 'error');
+        btn.innerHTML = 'Log In →';
+        btn.disabled = false;
+      }
+    } catch(e) {
+      toast('Login failed. Check connection.', 'error');
+      btn.innerHTML = 'Log In →';
+      btn.disabled = false;
+    }
+  };
+
+  // ── Check existing session ──
+  const sess = localStorage.getItem('pace2_session');
+  if (sess) {
+    try {
+      const s = JSON.parse(sess);
+      if (s && s.id) window.location.href = 'app.html';
+    } catch(e) {}
+  }
+
+})();
+</script>
+</body>
+</html>
