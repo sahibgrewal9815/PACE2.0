@@ -7,6 +7,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#060608">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -28,14 +30,62 @@
 
 html, body {
   height: 100dvh;
-  background:
-    radial-gradient(ellipse 90% 60% at 15% 10%, rgba(255,85,0,0.16) 0%, transparent 55%),
-    radial-gradient(ellipse 70% 70% at 85% 90%, rgba(255,120,0,0.1) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 50% at 50% 50%, rgba(100,30,0,0.12) 0%, transparent 65%),
-    #060608;
+  background: #060608;
   color: var(--text);
   font-family: 'Inter', -apple-system, sans-serif;
   overflow: hidden;
+}
+
+/* Animated background blobs */
+body::before {
+  content: '';
+  position: fixed;
+  top: -20%; left: -15%;
+  width: 70vw; height: 70vw;
+  background: radial-gradient(circle, rgba(255,85,0,0.14) 0%, transparent 65%);
+  border-radius: 50%;
+  animation: blobA 9s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -20%; right: -15%;
+  width: 65vw; height: 65vw;
+  background: radial-gradient(circle, rgba(255,140,0,0.09) 0%, transparent 65%);
+  border-radius: 50%;
+  animation: blobB 12s ease-in-out infinite alternate-reverse;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes blobA {
+  0%   { transform: translate(0,0) scale(1); }
+  33%  { transform: translate(8vw, 5vh) scale(1.1); }
+  66%  { transform: translate(-4vw, 10vh) scale(0.95); }
+  100% { transform: translate(5vw, -5vh) scale(1.08); }
+}
+@keyframes blobB {
+  0%   { transform: translate(0,0) scale(1); }
+  33%  { transform: translate(-6vw, -8vh) scale(1.12); }
+  66%  { transform: translate(4vw, -4vh) scale(0.92); }
+  100% { transform: translate(-8vw, 6vh) scale(1.05); }
+}
+
+/* Third subtle mid blob */
+.blob-mid {
+  position: fixed;
+  top: 40%; left: 30%;
+  width: 40vw; height: 40vw;
+  background: radial-gradient(circle, rgba(180,50,0,0.07) 0%, transparent 65%);
+  border-radius: 50%;
+  animation: blobC 15s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes blobC {
+  0%, 100% { transform: translate(0,0) scale(1); }
+  50%       { transform: translate(10vw, -8vh) scale(1.2); }
 }
 
 /* ── GLASS MIXIN ── */
@@ -58,14 +108,26 @@ html, body {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding: calc(var(--safe-top) + 16px) 18px 24px;
-  animation: pageIn 0.35s cubic-bezier(0.16,1,0.3,1);
+  z-index: 1;
 }
 .page::-webkit-scrollbar { display: none; }
-.page.active { display: block; }
+.page.active {
+  display: block;
+  animation: pageIn 0.4s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+.page.exit {
+  display: block;
+  animation: pageOut 0.25s cubic-bezier(0.4,0,1,1) forwards;
+  pointer-events: none;
+}
 
 @keyframes pageIn {
-  from { opacity:0; transform: translateY(12px); }
-  to   { opacity:1; transform: translateY(0); }
+  from { opacity:0; transform: translateY(16px) scale(0.98); }
+  to   { opacity:1; transform: translateY(0) scale(1); }
+}
+@keyframes pageOut {
+  from { opacity:1; transform: translateY(0) scale(1); }
+  to   { opacity:0; transform: translateY(-8px) scale(1.01); }
 }
 
 /* ── TOP BAR ── */
@@ -618,6 +680,8 @@ html, body {
 </style>
 </head>
 <body>
+
+<div class="blob-mid"></div>
 
 <!-- Full screen loader -->
 <div id="app-loader">
@@ -1231,14 +1295,29 @@ html, body {
 
   // ── Navigation ──
   window.switchPage = function(name, el) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const current = document.querySelector('.page.active');
+    const next = document.getElementById('page-' + name);
+    if (current === next) return;
+
+    // Nav active state
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.getElementById('page-' + name).classList.add('active');
     el.classList.add('active');
+
+    // Exit current
+    if (current) {
+      current.classList.add('exit');
+      current.classList.remove('active');
+      setTimeout(() => current.classList.remove('exit'), 260);
+    }
+
+    // Enter next
+    setTimeout(() => {
+      next.classList.add('active');
+    }, 80);
 
     const wrap = document.getElementById('msg-input-wrap');
     if (name === 'messages') {
-      loadMessages();
+      setTimeout(loadMessages, 120);
     } else {
       wrap.style.display = 'none';
     }
