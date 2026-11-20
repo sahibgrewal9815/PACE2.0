@@ -1074,10 +1074,11 @@ body::after {
       </div>
       <div class="divider"></div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="btn btn-primary" onclick="openPlanEditor('${a.id}','workout')">🏋️ Edit Workout Plan</button>
-        <button class="btn btn-primary" onclick="openPlanEditor('${a.id}','diet')">🥗 Edit Diet Plan</button>
+        <button class="btn btn-primary" onclick="uploadPlanJSON('${a.id}','workout')">🏋️ Upload Workout JSON</button>
+        <button class="btn btn-primary" onclick="uploadPlanJSON('${a.id}','diet')">🥗 Upload Diet JSON</button>
         <button class="btn btn-view" onclick="closeModal('modal-athlete');openChat('${a.id}')">💬 Message</button>
         <button class="btn btn-view" onclick="editHabits('${a.id}')">📋 Edit Habits</button>
+        <input type="file" id="json-upload-input" accept=".json" style="display:none" onchange="handleJSONUpload(event)">
       </div>
     `;
     openModal('modal-athlete');
@@ -1090,18 +1091,45 @@ body::after {
   let planEditorDay = 1;
   let planEditorData = {};
 
+  // ── JSON Upload Plan ──
+  let jsonUploadTarget = { athleteId: null, type: null };
+
+  window.uploadPlanJSON = function(athleteId, type) {
+    jsonUploadTarget = { athleteId, type };
+    const input = document.getElementById('json-upload-input');
+    input.value = '';
+    input.click();
+  };
+
+  window.handleJSONUpload = function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      let parsed;
+      try { parsed = JSON.parse(e.target.result); }
+      catch(err) { toast('Invalid JSON file', 'error'); return; }
+
+      const { athleteId, type } = jsonUploadTarget;
+      const field = type + '_plan';
+      const ath = allAthletes.find(a=>a.id===athleteId);
+
+      try {
+        await fetch(`${SB_URL}/rest/v1/athletes?id=eq.${athleteId}`, {
+          method: 'PATCH', headers: H,
+          body: JSON.stringify({ [field]: parsed })
+        });
+        const idx = allAthletes.findIndex(a=>a.id===athleteId);
+        if (idx>=0) allAthletes[idx][field] = parsed;
+        closeModal('modal-athlete');
+        toast(`✓ ${ath?.name}'s ${type} plan updated!`, 'success');
+      } catch(err) { toast('Error saving plan', 'error'); }
+    };
+    reader.readAsText(file);
+  };
+
   window.openPlanEditor = async function(athleteId, type) {
-    closeModal('modal-athlete');
-    planEditorAthlete = allAthletes.find(a=>a.id===athleteId);
-    planEditorType = type;
-    planEditorDay = 1;
-    planEditorData = JSON.parse(JSON.stringify(planEditorAthlete[type+'_plan'] || {}));
-
-    document.getElementById('plan-modal-title').textContent =
-      `${planEditorAthlete.name} · ${type==='workout'?'Workout':'Diet'} Plan`;
-
-    renderPlanEditor();
-    openModal('modal-plan');
+    // kept for compatibility — now handled by uploadPlanJSON
   };
 
   function renderPlanEditor() {
