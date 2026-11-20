@@ -784,8 +784,12 @@
       <label class="input-label">Height (cm)</label>
       <input class="input-field" type="number" id="inp-height" placeholder="175" min="120" max="250">
     </div>
+    <div class="input-group">
+      <label class="input-label">Goal Deadline 🎯</label>
+      <input class="input-field" type="date" id="inp-goal-date" style="color-scheme:dark">
+    </div>
     <div class="note-box">
-      <strong>Why we ask this →</strong> Your trainer uses these numbers to calculate your exact calorie targets, macros, and workout intensity.
+      <strong>Why we ask this →</strong> Your trainer uses these numbers to calculate your exact calorie targets, macros, and workout intensity. The deadline sets how aggressive your plan will be.
     </div>
   </div>
 
@@ -1063,10 +1067,13 @@
     const cw = document.getElementById('inp-current-weight').value;
     const tw = document.getElementById('inp-target-weight').value;
     const ht = document.getElementById('inp-height').value;
+    const gd = document.getElementById('inp-goal-date').value;
     if (!cw) { toast('Enter your current weight', 'error'); return; }
     if (!tw) { toast('Enter your target weight', 'error'); return; }
     if (!ht) { toast('Enter your height', 'error'); return; }
-    Object.assign(D, { current_weight: parseFloat(cw), target_weight: parseFloat(tw), height: parseFloat(ht) });
+    if (!gd) { toast('Enter your goal deadline date', 'error'); return; }
+    if (new Date(gd) <= new Date()) { toast('Goal date must be in the future', 'error'); return; }
+    Object.assign(D, { current_weight: parseFloat(cw), target_weight: parseFloat(tw), height: parseFloat(ht), goal_date: gd });
     goTo('screen-s4');
   };
 
@@ -1131,6 +1138,7 @@
         age: D.age, gender: D.gender,
         workout_location: D.workout_location,
         diet_preference: D.diet_preference,
+        goal_date: D.goal_date,
         payment_screenshot_url: paymentUrl || 'uploaded',
         body_image_url: bodyUrl,
         status: 'payment_submitted'

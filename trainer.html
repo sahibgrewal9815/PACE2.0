@@ -818,6 +818,7 @@ body::after {
   </div>
 </div>
 
+<script src="engine/plan-engine.js"></script>
 <script>
 (function(){
   const SB_URL = 'https://blnqehdnorjvboxcqiap.supabase.co';
@@ -987,19 +988,47 @@ body::after {
     const req = allRequests.find(r=>r.id===id);
     if (!req) return;
     const password = genPassword();
+
+    // ── Auto-generate plans via plan engine ──
+    let workout_plan = null, diet_plan = null, macros = null;
+    try {
+      if (window.PaceEngine) {
+        const profile = {
+          name: req.name,
+          phone: req.phone,
+          goal: req.goal || 'maintenance',
+          current_weight: req.current_weight,
+          target_weight: req.target_weight,
+          height: req.height,
+          age: req.age,
+          gender: req.gender,
+          workout_preference: req.workout_location || req.workout_preference || 'gym',
+          diet_preference: (req.diet_preference || 'non_veg').replace('_','-'),
+          goal_date: req.goal_date || null,
+        };
+        const result = window.PaceEngine.generatePlans(profile);
+        workout_plan = result.workout_plan;
+        diet_plan    = result.diet_plan;
+        macros       = result.macros;
+      }
+    } catch(e) { console.warn('Plan engine error:', e); }
+
     // Create athlete account
     try {
-      const r = await fetch(`${SB_URL}/rest/v1/athletes`, {
+      await fetch(`${SB_URL}/rest/v1/athletes`, {
         method: 'POST',
         headers: { ...H, 'Prefer':'return=minimal' },
         body: JSON.stringify({
           name: req.name, phone: req.phone, email: req.email,
           password: password, trainer_id: TRAINER.id,
           goal: req.goal, current_weight: req.current_weight,
-          target_weight: req.target_weight, age: req.age,
-          gender: req.gender, status: 'active',
-          workout_preference: req.workout_preference,
-          diet_preference: req.diet_preference
+          target_weight: req.target_weight, height: req.height,
+          age: req.age, gender: req.gender, status: 'active',
+          workout_preference: req.workout_location || req.workout_preference,
+          diet_preference: req.diet_preference,
+          goal_date: req.goal_date,
+          workout_plan: workout_plan,
+          diet_plan: diet_plan
         })
       });
       // Update request status
@@ -1015,10 +1044,12 @@ body::after {
       if (card) card.querySelector('.status-pill').textContent = 'APPROVED';
       await loadAthletes();
       renderOverview();
-      toast(`✓ ${req.name} approved! Password: ${password}`, 'success');
+      const macroInfo = macros ? ` | ${macros.calories} kcal · ${macros.protein}g protein` : '';
+      toast(`✓ ${req.name} approved! Plans auto-generated${macroInfo}`, 'success');
       // Show credentials
-      setTimeout(() => alert(`Athlete Created!\n\nName: ${req.name}\nPhone: ${req.phone}\nPassword: ${password}\n\nShare these credentials with the athlete.`), 500);
-    } catch(e) { toast('Error approving request', 'error'); }
+      const macroStr = macros ? `\nCalories: ${macros.calories} kcal\nProtein: ${macros.protein}g · Carbs: ${macros.carbs}g · Fat: ${macros.fat}g\nIntensity: ${macros.intensity}` : '';
+      setTimeout(() => alert(`Athlete Created!\n\nName: ${req.name}\nPhone: ${req.phone}\nPassword: ${password}\n${macroStr}\n\nShare credentials with the athlete.`), 500);
+    } catch(e) { console.error(e); toast('Error approving request', 'error'); }
   };
 
   window.rejectRequest = async function(id) {
