@@ -982,8 +982,8 @@
   <div class="login-sub">Progress · Activity · Consistency · Energy</div>
 
   <div class="input-group">
-    <label class="input-label">Username</label>
-    <input class="input-field" type="text" id="login-username" placeholder="your username" autocomplete="username">
+    <label class="input-label">Phone Number</label>
+    <input class="input-field" type="tel" id="login-username" placeholder="98765 43210" autocomplete="tel">
   </div>
   <div class="input-group" style="margin-bottom:24px;">
     <label class="input-label">Password</label>
@@ -1159,16 +1159,16 @@
 
   // ── Login ──
   window.doLogin = async function() {
-    const username = document.getElementById('login-username').value.trim();
+    const username = document.getElementById('login-username').value.trim().replace(/\s+/g,'');
     const password = document.getElementById('login-password').value.trim();
-    if (!username || !password) { toast('Enter username and password', 'error'); return; }
+    if (!username || !password) { toast('Enter phone and password', 'error'); return; }
 
     const btn = document.getElementById('login-btn');
     btn.innerHTML = '<span class="loader"></span> Logging in...';
     btn.disabled = true;
 
     try {
-      const res = await fetch(`${SB_URL}/rest/v1/athletes?username=eq.${encodeURIComponent(username)}&password=eq.${encodeURIComponent(password)}&status=eq.active`, {
+      const res = await fetch(`${SB_URL}/rest/v1/athletes?phone=eq.${encodeURIComponent(username)}&password=eq.${encodeURIComponent(password)}&status=eq.active`, {
         headers: H
       });
       const data = await res.json();
