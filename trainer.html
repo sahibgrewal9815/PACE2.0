@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>PACE — Trainer Dashboard</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#060608">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #060608;
+  --acc: #FF5500;
+  --acc2: #FF8C00;
+  --text: #fff;
+  --text2: rgba(255,255,255,0.55);
+  --text3: rgba(255,255,255,0.28);
+  --green: #22c55e;
+  --red: #ef4444;
+  --blue: #3b82f6;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --nav-h: 72px;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+html, body {
+  min-height: 100dvh;
+  background: #060608;
+  color: var(--text);
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: -20%; left: -15%;
+  width: 70vw; height: 70vw;
+  background: radial-gradient(circle, rgba(255,85,0,0.13) 0%, transparent 65%);
+  border-radius: 50%;
+  animation: blobA 9s ease-in-out infinite alternate;
+  pointer-events: none; z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -20%; right: -15%;
+  width: 60vw; height: 60vw;
+  background: radial-gradient(circle, rgba(255,140,0,0.08) 0%, transparent 65%);
+  border-radius: 50%;
+  animation: blobB 12s ease-in-out infinite alternate-reverse;
+  pointer-events: none; z-index: 0;
+}
+@keyframes blobA {
+  0%   { transform: translate(0,0) scale(1); }
+  100% { transform: translate(6vw, 8vh) scale(1.1); }
+}
+@keyframes blobB {
+  0%   { transform: translate(0,0) scale(1); }
+  100% { transform: translate(-8vw, -6vh) scale(1.12); }
+}
+
+/* ── GLASS ── */
+.glass {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  outline: 1px solid rgba(255,255,255,0.13);
+  outline-offset: -1px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.2);
+}
+
+/* ── LAYOUT ── */
+.sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: 240px; height: 100dvh;
+  padding: calc(var(--safe-top) + 24px) 16px 24px;
+  display: flex; flex-direction: column; gap: 4px;
+  border-right: 1px solid rgba(255,255,255,0.07);
+  background: rgba(6,6,8,0.6);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  z-index: 100;
+}
+
+.main {
+  margin-left: 240px;
+  min-height: 100dvh;
+  padding: calc(var(--safe-top) + 32px) 32px 48px;
+  position: relative; z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: calc(var(--safe-top) + 16px) 16px 100px; }
+  .bottom-nav-mobile { display: flex !important; }
+}
+
+/* ── SIDEBAR ── */
+.logo-wrap {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 8px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  margin-bottom: 8px;
+}
+.logo-text {
+  font-size: 22px; font-weight: 900; letter-spacing: -1px;
+  background: linear-gradient(135deg, #fff, var(--acc2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.logo-sub { font-size: 10px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
+
+.nav-link {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px;
+  border-radius: 14px;
+  font-size: 14px; font-weight: 600;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.nav-link:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+.nav-link.active {
+  background: rgba(255,85,0,0.12);
+  color: var(--acc2);
+  outline: 1px solid rgba(255,85,0,0.2);
+  outline-offset: -1px;
+}
+.nav-icon { font-size: 18px; width: 24px; text-align: center; }
+.nav-badge {
+  margin-left: auto;
+  background: var(--acc);
+  color: white;
+  font-size: 10px; font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 20px;
+  min-width: 20px; text-align: center;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.trainer-info { padding: 10px 8px; }
+.trainer-name { font-size: 14px; font-weight: 700; }
+.trainer-role { font-size: 11px; color: var(--text3); }
+.logout-btn {
+  width: 100%;
+  padding: 10px;
+  background: rgba(239,68,68,0.1);
+  outline: 1px solid rgba(239,68,68,0.2);
+  outline-offset: -1px;
+  border: 0; border-radius: 12px;
+  color: var(--red);
+  font-size: 13px; font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer; margin-top: 8px;
+  transition: all 0.2s;
+}
+.logout-btn:hover { background: rgba(239,68,68,0.18); }
+
+/* ── PAGES ── */
+.page { display: none; animation: pageIn 0.35s cubic-bezier(0.16,1,0.3,1); }
+.page.active { display: block; }
+@keyframes pageIn {
+  from { opacity:0; transform: translateY(12px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+/* ── SECTION LABEL ── */
+.sec-label {
+  font-size: 11px; font-weight: 800; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--text3);
+  margin-bottom: 14px; margin-top: 28px;
+}
+.page-title {
+  font-size: 28px; font-weight: 900; letter-spacing: -1px;
+  margin-bottom: 4px;
+}
+.page-sub { font-size: 14px; color: var(--text2); margin-bottom: 0; }
+
+/* ── STAT CARDS ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px; margin-bottom: 0;
+}
+.stat-card {
+  border-radius: 20px; padding: 20px;
+}
+.stat-icon { font-size: 24px; margin-bottom: 10px; display: block; }
+.stat-num { font-size: 36px; font-weight: 900; letter-spacing: -2px; line-height: 1; }
+.stat-label { font-size: 12px; color: var(--text2); margin-top: 4px; font-weight: 500; }
+.stat-card.orange .stat-num { color: var(--acc2); }
+.stat-card.green .stat-num { color: var(--green); }
+
+/* ── SIGNUP REQUEST CARD ── */
+.request-card {
+  border-radius: 20px; padding: 20px;
+  margin-bottom: 12px;
+  position: relative;
+}
+.request-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 12px;
+  margin-bottom: 14px;
+}
+.request-name { font-size: 18px; font-weight: 800; }
+.request-time { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.status-pill {
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 11px; font-weight: 700;
+  flex-shrink: 0;
+}
+.status-pill.pending { background: rgba(234,179,8,0.15); color: #fde047; outline: 1px solid rgba(234,179,8,0.25); outline-offset:-1px; }
+.status-pill.approved { background: rgba(34,197,94,0.15); color: var(--green); outline: 1px solid rgba(34,197,94,0.25); outline-offset:-1px; }
+.status-pill.rejected { background: rgba(239,68,68,0.12); color: var(--red); outline: 1px solid rgba(239,68,68,0.2); outline-offset:-1px; }
+
+.request-info {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; margin-bottom: 14px;
+}
+.info-row { font-size: 13px; }
+.info-label { color: var(--text3); font-size: 11px; font-weight: 600; margin-bottom: 1px; }
+.info-val { font-weight: 600; }
+
+.request-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn {
+  padding: 10px 18px; border-radius: 12px; border: 0;
+  font-size: 13px; font-weight: 700; font-family: 'Inter', sans-serif;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-approve {
+  background: rgba(34,197,94,0.15);
+  outline: 1px solid rgba(34,197,94,0.3); outline-offset:-1px;
+  color: var(--green);
+}
+.btn-approve:hover { background: rgba(34,197,94,0.25); }
+.btn-reject {
+  background: rgba(239,68,68,0.1);
+  outline: 1px solid rgba(239,68,68,0.2); outline-offset:-1px;
+  color: var(--red);
+}
+.btn-reject:hover { background: rgba(239,68,68,0.2); }
+.btn-view {
+  background: rgba(255,255,255,0.06);
+  outline: 1px solid rgba(255,255,255,0.12); outline-offset:-1px;
+  color: var(--text2);
+}
+.btn-view:hover { color: var(--text); }
+.btn-primary {
+  background: linear-gradient(135deg, var(--acc), var(--acc2));
+  color: white;
+  box-shadow: 0 4px 16px rgba(255,85,0,0.3);
+}
+.btn-primary:hover { box-shadow: 0 6px 24px rgba(255,85,0,0.45); }
+
+/* ── ATHLETE ROW ── */
+.athlete-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px; border-radius: 18px; margin-bottom: 10px;
+  cursor: pointer; transition: all 0.2s;
+}
+.athlete-row:hover { outline-color: rgba(255,85,0,0.3); }
+.athlete-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255,85,0,0.2), rgba(255,140,0,0.1));
+  outline: 1px solid rgba(255,85,0,0.25); outline-offset:-1px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 900; color: var(--acc2);
+  flex-shrink: 0;
+}
+.athlete-info { flex: 1; }
+.athlete-name { font-size: 15px; font-weight: 700; }
+.athlete-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.athlete-status { flex-shrink: 0; }
+
+/* ── MESSAGE ROW ── */
+.msg-row {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 16px; border-radius: 18px; margin-bottom: 10px;
+}
+.msg-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,85,0,0.12);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 14px; color: var(--acc);
+  flex-shrink: 0;
+}
+.msg-content { flex: 1; }
+.msg-sender { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.msg-text { font-size: 14px; color: var(--text2); line-height: 1.5; }
+.msg-time { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 500;
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: rgba(10,10,16,0.95);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  outline: 1px solid rgba(255,255,255,0.15);
+  outline-offset: -1px;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.15);
+  border-radius: 28px;
+  padding: 28px;
+  width: 100%; max-width: 560px;
+  max-height: 90dvh; overflow-y: auto;
+  animation: modalIn 0.35s cubic-bezier(0.16,1,0.3,1);
+}
+.modal::-webkit-scrollbar { display: none; }
+@keyframes modalIn {
+  from { opacity:0; transform: scale(0.95) translateY(16px); }
+  to   { opacity:1; transform: scale(1) translateY(0); }
+}
+.modal-title { font-size: 20px; font-weight: 900; margin-bottom: 20px; }
+.modal-close {
+  float: right; background: rgba(255,255,255,0.08);
+  outline: 1px solid rgba(255,255,255,0.12); outline-offset:-1px;
+  border: 0; border-radius: 10px;
+  color: var(--text2); font-size: 18px;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; float: right;
+}
+
+/* ── FORM FIELDS ── */
+.field-group { margin-bottom: 16px; }
+.field-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+.field-input {
+  width: 100%; padding: 13px 16px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(20px);
+  outline: 1px solid rgba(255,255,255,0.12); outline-offset:-1px;
+  border: 0; border-radius: 14px;
+  color: var(--text); font-size: 14px; font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+  transition: outline-color 0.2s;
+}
+.field-input:focus { outline-color: rgba(255,85,0,0.5); }
+.field-select {
+  width: 100%; padding: 13px 16px;
+  background: rgba(255,255,255,0.05);
+  outline: 1px solid rgba(255,255,255,0.12); outline-offset:-1px;
+  border: 0; border-radius: 14px;
+  color: var(--text); font-size: 14px; font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+}
+.field-select option { background: #0a0a0e; }
+.field-textarea {
+  width: 100%; padding: 13px 16px;
+  background: rgba(255,255,255,0.05);
+  outline: 1px solid rgba(255,255,255,0.12); outline-offset:-1px;
+  border: 0; border-radius: 14px;
+  color: var(--text); font-size: 14px; font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  resize: vertical; min-height: 100px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.field-textarea:focus { outline-color: rgba(255,85,0,0.5); }
+.fields-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ── PLAN EDITOR ── */
+.plan-day-tab {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.day-tab {
+  padding: 7px 14px; border-radius: 20px;
+  font-size: 12px; font-weight: 700;
+  background: rgba(255,255,255,0.05);
+  outline: 1px solid rgba(255,255,255,0.1); outline-offset:-1px;
+  color: var(--text2); cursor: pointer; transition: all 0.2s;
+}
+.day-tab.active {
+  background: rgba(255,85,0,0.15);
+  outline-color: rgba(255,85,0,0.3);
+  color: var(--acc2);
+}
+
+/* ── CHAT (messages page) ── */
+.chat-wrap {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 16px;
+  height: calc(100dvh - 120px);
+}
+@media (max-width: 900px) {
+  .chat-wrap { grid-template-columns: 1fr; }
+  .chat-list-col { display: none; }
+  .chat-list-col.show { display: block; }
+}
+.chat-list-col {
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.chat-list-inner {
+  overflow-y: auto; flex: 1;
+  padding: 8px;
+}
+.chat-list-inner::-webkit-scrollbar { display: none; }
+.chat-thread {
+  padding: 12px; border-radius: 14px; cursor: pointer;
+  transition: all 0.2s; margin-bottom: 4px;
+  display: flex; gap: 10px; align-items: center;
+}
+.chat-thread:hover { background: rgba(255,255,255,0.05); }
+.chat-thread.active { background: rgba(255,85,0,0.1); outline: 1px solid rgba(255,85,0,0.2); outline-offset:-1px; }
+.thread-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: rgba(255,85,0,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; color: var(--acc); font-size: 14px;
+  flex-shrink: 0;
+}
+.thread-info { flex: 1; min-width: 0; }
+.thread-name { font-size: 13px; font-weight: 700; }
+.thread-preview { font-size: 12px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.thread-unread {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--acc); flex-shrink: 0;
+}
+
+.chat-main-col {
+  border-radius: 20px;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.chat-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0;
+}
+.chat-messages {
+  flex: 1; overflow-y: auto; padding: 16px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.chat-messages::-webkit-scrollbar { display: none; }
+.chat-bubble {
+  max-width: 75%; padding: 12px 16px;
+  border-radius: 18px; font-size: 14px; line-height: 1.5;
+}
+.chat-bubble.athlete {
+  background: rgba(255,255,255,0.06);
+  outline: 1px solid rgba(255,255,255,0.1); outline-offset:-1px;
+  border-bottom-left-radius: 4px; align-self: flex-start;
+}
+.chat-bubble.trainer {
+  background: linear-gradient(135deg, rgba(255,85,0,0.2), rgba(255,140,0,0.12));
+  outline: 1px solid rgba(255,85,0,0.25); outline-offset:-1px;
+  border-bottom-right-radius: 4px; align-self: flex-end;
+}
+.bubble-time { font-size: 10px; color: var(--text3); margin-top: 4px; }
+.chat-input-row {
+  padding: 14px 16px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  display: flex; gap: 10px; flex-shrink: 0;
+}
+.chat-input {
+  flex: 1; padding: 12px 16px;
+  background: rgba(255,255,255,0.05);
+  outline: 1px solid rgba(255,255,255,0.12); outline-offset:-1px;
+  border: 0; border-radius: 50px;
+  color: var(--text); font-size: 14px; font-family: 'Inter', sans-serif;
+}
+.chat-send-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--acc), var(--acc2));
+  border: 0; cursor: pointer; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(255,85,0,0.35);
+}
+
+/* ── PAYMENT SCREENSHOT ── */
+.payment-img {
+  width: 100%; max-height: 300px; object-fit: contain;
+  border-radius: 14px;
+  outline: 1px solid rgba(255,255,255,0.1); outline-offset:-1px;
+  margin: 12px 0;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  top: calc(var(--safe-top) + 20px); left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10,10,14,0.9);
+  backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+  outline: 1px solid rgba(255,255,255,0.15); outline-offset:-1px;
+  border-radius: 14px; padding: 12px 22px;
+  font-size: 14px; font-weight: 600; color: var(--text);
+  z-index: 9999; pointer-events: none; opacity:0;
+  transition: opacity 0.3s; white-space: nowrap;
+}
+.toast.show { opacity:1; }
+.toast.success { outline-color: rgba(34,197,94,0.4); color: var(--green); }
+.toast.error { outline-color: rgba(239,68,68,0.4); color: var(--red); }
+
+/* ── LOADER ── */
+.loader {
+  display: inline-block; width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-top-color: var(--acc); border-radius: 50%;
+  animation: spin 0.7s linear infinite; vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Full loader */
+#dash-loader {
+  position: fixed; inset:0;
+  background: var(--bg);
+  display: flex; align-items:center; justify-content:center;
+  flex-direction:column; gap:16px; z-index:999;
+}
+#dash-loader .logo {
+  font-size:48px; font-weight:900; letter-spacing:-3px;
+  background: linear-gradient(135deg, #fff, var(--acc2));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+
+/* ── BOTTOM NAV MOBILE ── */
+.bottom-nav-mobile {
+  display: none;
+  position: fixed; bottom:0; left:0; right:0;
+  height: calc(var(--nav-h) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: rgba(6,6,8,0.8);
+  backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  z-index: 100;
+  align-items: flex-start; justify-content: space-around;
+  padding-top: 10px;
+}
+.mob-nav-item {
+  display: flex; flex-direction: column; align-items: center; gap:3px;
+  cursor: pointer; padding: 4px 12px;
+}
+.mob-nav-icon { font-size: 20px; }
+.mob-nav-label { font-size: 10px; color: var(--text3); font-weight:600; }
+.mob-nav-item.active .mob-nav-label { color: var(--acc); }
+.mob-nav-item.active::before {
+  content:''; position:absolute; top:0; width:20px; height:2px;
+  background: linear-gradient(90deg, var(--acc), var(--acc2));
+  border-radius:10px;
+}
+
+.empty-state {
+  text-align: center; padding: 60px 20px; color: var(--text2);
+}
+.empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+.empty-state .title { font-size: 18px; font-weight:700; color:var(--text); margin-bottom:8px; }
+.empty-state .sub { font-size: 14px; line-height:1.6; }
+
+.divider { height:1px; background:rgba(255,255,255,0.06); margin:20px 0; }
+</style>
+</head>
+<body>
+
+<div id="dash-loader">
+  <div class="logo">PACE</div>
+  <div style="font-size:11px;color:var(--text3);letter-spacing:3px;text-transform:uppercase;">Trainer Dashboard</div>
+  <div class="loader"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════ SIDEBAR ══════════════ -->
+<nav class="sidebar">
+  <div class="logo-wrap">
+    <div>
+      <div class="logo-text">PACE</div>
+      <div class="logo-sub">Punjab · Trainer</div>
+    </div>
+  </div>
+
+  <div class="nav-link active" onclick="switchPage('overview',this)">
+    <span class="nav-icon">📊</span> Overview
+  </div>
+  <div class="nav-link" onclick="switchPage('requests',this)" id="nav-requests">
+    <span class="nav-icon">📥</span> Signup Requests
+    <span class="nav-badge" id="requests-badge" style="display:none">0</span>
+  </div>
+  <div class="nav-link" onclick="switchPage('athletes',this)">
+    <span class="nav-icon">👥</span> Athletes
+  </div>
+  <div class="nav-link" onclick="switchPage('messages',this)" id="nav-msgs">
+    <span class="nav-icon">💬</span> Messages
+    <span class="nav-badge" id="msgs-badge" style="display:none">0</span>
+  </div>
+  <div class="nav-link" onclick="switchPage('create',this)">
+    <span class="nav-icon">➕</span> Create Athlete
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="trainer-info">
+      <div class="trainer-name" id="trainer-name-display">—</div>
+      <div class="trainer-role">Head Trainer</div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">Log Out</button>
+  </div>
+</nav>
+
+<!-- ══════════════ MAIN ══════════════ -->
+<main class="main">
+
+  <!-- ── OVERVIEW ── -->
+  <div class="page active" id="page-overview">
+    <div class="page-title">Dashboard</div>
+    <div class="page-sub" id="overview-date">—</div>
+
+    <div class="sec-label">At a Glance</div>
+    <div class="stats-grid">
+      <div class="stat-card glass">
+        <span class="stat-icon">👥</span>
+        <div class="stat-num" id="stat-total">—</div>
+        <div class="stat-label">Total Athletes</div>
+      </div>
+      <div class="stat-card glass orange">
+        <span class="stat-icon">📥</span>
+        <div class="stat-num" id="stat-pending">—</div>
+        <div class="stat-label">Pending Requests</div>
+      </div>
+      <div class="stat-card glass green">
+        <span class="stat-icon">✅</span>
+        <div class="stat-num" id="stat-active">—</div>
+        <div class="stat-label">Active Athletes</div>
+      </div>
+      <div class="stat-card glass">
+        <span class="stat-icon">💬</span>
+        <div class="stat-num" id="stat-msgs">—</div>
+        <div class="stat-label">New Messages</div>
+      </div>
+    </div>
+
+    <!-- Recent requests -->
+    <div class="sec-label">Recent Requests</div>
+    <div id="overview-requests"></div>
+
+    <!-- Recent messages -->
+    <div class="sec-label">Recent Messages</div>
+    <div id="overview-msgs"></div>
+  </div>
+
+  <!-- ── SIGNUP REQUESTS ── -->
+  <div class="page" id="page-requests">
+    <div class="page-title">Signup Requests</div>
+    <div class="page-sub">Review and approve new athlete applications</div>
+
+    <div style="display:flex; gap:10px; margin-top:20px; margin-bottom:4px; flex-wrap:wrap;">
+      <button class="btn btn-view filter-btn active" data-filter="pending" onclick="filterRequests('pending',this)">⏳ Pending</button>
+      <button class="btn btn-view filter-btn" data-filter="approved" onclick="filterRequests('approved',this)">✅ Approved</button>
+      <button class="btn btn-view filter-btn" data-filter="all" onclick="filterRequests('all',this)">All</button>
+    </div>
+
+    <div class="sec-label">Applications</div>
+    <div id="requests-list"></div>
+  </div>
+
+  <!-- ── ATHLETES ── -->
+  <div class="page" id="page-athletes">
+    <div class="page-title">Athletes</div>
+    <div class="page-sub">Manage your athletes and their plans</div>
+
+    <div class="sec-label">All Athletes</div>
+    <div id="athletes-list"></div>
+  </div>
+
+  <!-- ── MESSAGES ── -->
+  <div class="page" id="page-messages">
+    <div class="page-title">Messages</div>
+    <div class="page-sub">Chat with your athletes</div>
+    <div class="sec-label" style="margin-top:16px;"></div>
+    <div class="chat-wrap">
+      <div class="chat-list-col glass" id="chat-list-col">
+        <div style="padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.07);">
+          <div style="font-size:13px; font-weight:700; color:var(--text2);">Conversations</div>
+        </div>
+        <div class="chat-list-inner" id="chat-threads"></div>
+      </div>
+      <div class="chat-main-col glass" id="chat-main-col">
+        <div class="empty-state" style="margin:auto;">
+          <div class="icon">💬</div>
+          <div class="title">Select a conversation</div>
+          <div class="sub">Pick an athlete from the left to start chatting</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CREATE ATHLETE ── -->
+  <div class="page" id="page-create">
+    <div class="page-title">Create Athlete</div>
+    <div class="page-sub">Manually add a new athlete account</div>
+
+    <div class="sec-label">Personal Info</div>
+    <div class="glass" style="border-radius:24px; padding:24px;">
+      <div class="fields-row">
+        <div class="field-group">
+          <div class="field-label">Full Name</div>
+          <input class="field-input" type="text" id="c-name" placeholder="Arjun Singh">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Phone</div>
+          <input class="field-input" type="tel" id="c-phone" placeholder="98765 43210">
+        </div>
+      </div>
+      <div class="fields-row">
+        <div class="field-group">
+          <div class="field-label">Email</div>
+          <input class="field-input" type="email" id="c-email" placeholder="arjun@email.com">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Password</div>
+          <input class="field-input" type="text" id="c-password" placeholder="auto-generated">
+        </div>
+      </div>
+      <div class="fields-row">
+        <div class="field-group">
+          <div class="field-label">Current Weight (kg)</div>
+          <input class="field-input" type="number" id="c-weight" placeholder="75">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Target Weight (kg)</div>
+          <input class="field-input" type="number" id="c-target" placeholder="70">
+        </div>
+      </div>
+      <div class="fields-row">
+        <div class="field-group">
+          <div class="field-label">Goal</div>
+          <select class="field-select" id="c-goal">
+            <option value="weight_loss">Weight Loss</option>
+            <option value="weight_gain">Weight Gain</option>
+            <option value="muscle_gain">Muscle Gain</option>
+            <option value="maintenance">Maintenance</option>
+            <option value="endurance">Endurance</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Age</div>
+          <input class="field-input" type="number" id="c-age" placeholder="25">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="createAthlete()" style="width:100%; padding:14px; font-size:15px; border-radius:16px; margin-top:8px;">
+        Create Athlete Account
+      </button>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══════════════ MOBILE NAV ══════════════ -->
+<nav class="bottom-nav-mobile">
+  <div class="mob-nav-item active" onclick="switchPage('overview',this)">
+    <div class="mob-nav-icon">📊</div>
+    <div class="mob-nav-label">Overview</div>
+  </div>
+  <div class="mob-nav-item" onclick="switchPage('requests',this)">
+    <div class="mob-nav-icon">📥</div>
+    <div class="mob-nav-label">Requests</div>
+  </div>
+  <div class="mob-nav-item" onclick="switchPage('athletes',this)">
+    <div class="mob-nav-icon">👥</div>
+    <div class="mob-nav-label">Athletes</div>
+  </div>
+  <div class="mob-nav-item" onclick="switchPage('messages',this)">
+    <div class="mob-nav-icon">💬</div>
+    <div class="mob-nav-label">Messages</div>
+  </div>
+  <div class="mob-nav-item" onclick="switchPage('create',this)">
+    <div class="mob-nav-icon">➕</div>
+    <div class="mob-nav-label">Create</div>
+  </div>
+</nav>
+
+<!-- ══════════════ MODALS ══════════════ -->
+
+<!-- Request Detail Modal -->
+<div class="modal-overlay" id="modal-request">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-request')">✕</button>
+    <div class="modal-title" id="req-modal-name">—</div>
+    <div id="req-modal-body"></div>
+    <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap;" id="req-modal-actions"></div>
+  </div>
+</div>
+
+<!-- Athlete Profile Modal -->
+<div class="modal-overlay" id="modal-athlete">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-athlete')">✕</button>
+    <div class="modal-title" id="ath-modal-name">—</div>
+    <div id="ath-modal-body"></div>
+  </div>
+</div>
+
+<!-- Plan Editor Modal -->
+<div class="modal-overlay" id="modal-plan">
+  <div class="modal" style="max-width:680px;">
+    <button class="modal-close" onclick="closeModal('modal-plan')">✕</button>
+    <div class="modal-title" id="plan-modal-title">Edit Plan</div>
+    <div id="plan-modal-body"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const SB_URL = 'https://blnqehdnorjvboxcqiap.supabase.co';
+  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsbnFlaGRub3JqdmJveGNxaWFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxNzEzNjUsImV4cCI6MjExMDc0NzM2NX0.gMJ1LuHZ9SpN6_2hsO6XJJXr67qFrOgyM-GRRfziXVs';
+  const H = { 'Content-Type':'application/json', 'apikey':SB_KEY, 'Authorization':`Bearer ${SB_KEY}` };
+
+  let TRAINER = null;
+  let allRequests = [];
+  let allAthletes = [];
+  let currentFilter = 'pending';
+  let activeThread = null;
+
+  // ── Session ──
+  const sess = localStorage.getItem('pace2_trainer_session');
+  if (!sess) { window.location.href = 'trainer-login.html'; }
+  else {
+    try { TRAINER = JSON.parse(sess); } catch(e) { window.location.href = 'trainer-login.html'; }
+  }
+
+  async function init() {
+    document.getElementById('trainer-name-display').textContent = TRAINER.name || 'Trainer';
+    document.getElementById('overview-date').textContent = new Date().toLocaleDateString('en-IN', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+    await Promise.all([loadRequests(), loadAthletes(), loadMessages()]);
+    renderOverview();
+    document.getElementById('dash-loader').style.display = 'none';
+    // Auto-generate password hint
+    document.getElementById('c-password').placeholder = genPassword();
+  }
+
+  function genPassword() {
+    const words = ['Fire','Iron','Force','Steel','Blaze','Power','Storm'];
+    return words[Math.floor(Math.random()*words.length)] + Math.floor(Math.random()*900+100);
+  }
+
+  // ── Load data ──
+  async function loadRequests() {
+    const r = await fetch(`${SB_URL}/rest/v1/signup_requests?order=created_at.desc`, { headers: H });
+    allRequests = await r.json() || [];
+    const pending = allRequests.filter(r => r.status === 'pending').length;
+    const badge = document.getElementById('requests-badge');
+    if (pending > 0) { badge.textContent = pending; badge.style.display = 'inline'; }
+    document.getElementById('stat-pending').textContent = pending;
+  }
+
+  async function loadAthletes() {
+    const r = await fetch(`${SB_URL}/rest/v1/athletes?trainer_id=eq.${TRAINER.id}&order=created_at.desc`, { headers: H });
+    allAthletes = await r.json() || [];
+    document.getElementById('stat-total').textContent = allAthletes.length;
+    document.getElementById('stat-active').textContent = allAthletes.filter(a=>a.status==='active').length;
+  }
+
+  let allMessages = [];
+  async function loadMessages() {
+    const r = await fetch(`${SB_URL}/rest/v1/messages?trainer_id=eq.${TRAINER.id}&order=created_at.desc`, { headers: H });
+    allMessages = await r.json() || [];
+    // Unread = athlete messages not replied to
+    const unread = [...new Set(allMessages.filter(m=>m.sender==='athlete').map(m=>m.athlete_id))].length;
+    const badge = document.getElementById('msgs-badge');
+    if (unread > 0) { badge.textContent = unread; badge.style.display = 'inline'; }
+    document.getElementById('stat-msgs').textContent = unread;
+  }
+
+  // ── Overview ──
+  function renderOverview() {
+    // Recent requests
+    const recentReqs = allRequests.slice(0,3);
+    const reqContainer = document.getElementById('overview-requests');
+    if (!recentReqs.length) {
+      reqContainer.innerHTML = '<div class="empty-state" style="padding:30px;"><div class="icon">📭</div><div class="title">No requests yet</div></div>';
+    } else {
+      reqContainer.innerHTML = recentReqs.map(req => requestCardHTML(req, true)).join('');
+    }
+
+    // Recent messages
+    const recentMsgs = allMessages.filter(m=>m.sender==='athlete').slice(0,3);
+    const msgContainer = document.getElementById('overview-msgs');
+    if (!recentMsgs.length) {
+      msgContainer.innerHTML = '<div class="empty-state" style="padding:30px;"><div class="icon">💬</div><div class="title">No messages yet</div></div>';
+    } else {
+      msgContainer.innerHTML = recentMsgs.map(m => {
+        const ath = allAthletes.find(a=>a.id===m.athlete_id);
+        return `<div class="msg-row glass" style="border-radius:16px;">
+          <div class="msg-avatar">${(ath?.name||'?')[0]}</div>
+          <div class="msg-content">
+            <div class="msg-sender">${ath?.name||'Unknown'}</div>
+            <div class="msg-text">${m.message}</div>
+            <div class="msg-time">${timeAgo(m.created_at)}</div>
+          </div>
+          <button class="btn btn-view" onclick="openChat('${m.athlete_id}')">Reply</button>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  function requestCardHTML(req, compact=false) {
+    const statusClass = req.status;
+    return `<div class="request-card glass" id="req-${req.id}">
+      <div class="request-header">
+        <div>
+          <div class="request-name">${req.name}</div>
+          <div class="request-time">${timeAgo(req.created_at)}</div>
+        </div>
+        <div class="status-pill ${statusClass}">${req.status.toUpperCase()}</div>
+      </div>
+      ${!compact ? `<div class="request-info">
+        <div class="info-row"><div class="info-label">Phone</div><div class="info-val">${req.phone||'—'}</div></div>
+        <div class="info-row"><div class="info-label">Email</div><div class="info-val">${req.email||'—'}</div></div>
+        <div class="info-row"><div class="info-label">Goal</div><div class="info-val">${(req.goal||'—').replace('_',' ')}</div></div>
+        <div class="info-row"><div class="info-label">Weight</div><div class="info-val">${req.current_weight||'—'} kg</div></div>
+      </div>` : ''}
+      <div class="request-actions">
+        <button class="btn btn-view" onclick="openRequest('${req.id}')">👁 View</button>
+        ${req.status==='pending' ? `
+          <button class="btn btn-approve" onclick="approveRequest('${req.id}')">✓ Approve</button>
+          <button class="btn btn-reject" onclick="rejectRequest('${req.id}')">✗ Reject</button>
+        ` : ''}
+      </div>
+    </div>`;
+  }
+
+  // ── Requests Page ──
+  window.filterRequests = function(filter, el) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    el.classList.add('active');
+    renderRequests();
+  };
+
+  function renderRequests() {
+    const list = document.getElementById('requests-list');
+    let filtered = allRequests;
+    if (currentFilter !== 'all') filtered = allRequests.filter(r=>r.status===currentFilter);
+    if (!filtered.length) {
+      list.innerHTML = `<div class="empty-state"><div class="icon">📭</div><div class="title">No ${currentFilter} requests</div></div>`;
+      return;
+    }
+    list.innerHTML = filtered.map(req => requestCardHTML(req)).join('');
+  }
+
+  window.openRequest = function(id) {
+    const req = allRequests.find(r=>r.id===id);
+    if (!req) return;
+    document.getElementById('req-modal-name').textContent = req.name;
+    document.getElementById('req-modal-body').innerHTML = `
+      <div class="request-info" style="grid-template-columns:1fr 1fr; margin-bottom:16px;">
+        <div class="info-row"><div class="info-label">Phone</div><div class="info-val">${req.phone||'—'}</div></div>
+        <div class="info-row"><div class="info-label">Email</div><div class="info-val">${req.email||'—'}</div></div>
+        <div class="info-row"><div class="info-label">Goal</div><div class="info-val">${(req.goal||'—').replace('_',' ')}</div></div>
+        <div class="info-row"><div class="info-label">Current Weight</div><div class="info-val">${req.current_weight||'—'} kg</div></div>
+        <div class="info-row"><div class="info-label">Target Weight</div><div class="info-val">${req.target_weight||'—'} kg</div></div>
+        <div class="info-row"><div class="info-label">Age</div><div class="info-val">${req.age||'—'}</div></div>
+        <div class="info-row"><div class="info-label">Gender</div><div class="info-val">${req.gender||'—'}</div></div>
+        <div class="info-row"><div class="info-label">Workout Pref</div><div class="info-val">${req.workout_preference||'—'}</div></div>
+      </div>
+      ${req.diet_preference ? `<div class="info-row" style="margin-bottom:12px;"><div class="info-label">Diet Preference</div><div class="info-val">${req.diet_preference}</div></div>` : ''}
+      ${req.payment_screenshot_url ? `<div class="info-label" style="margin-bottom:6px;">Payment Screenshot</div><img class="payment-img" src="${req.payment_screenshot_url}" onerror="this.style.display='none'">` : '<div style="color:var(--text3); font-size:13px; margin-bottom:12px;">No payment screenshot uploaded</div>'}
+      ${req.body_photo_url ? `<div class="info-label" style="margin-bottom:6px;">Body Photo</div><img class="payment-img" src="${req.body_photo_url}" onerror="this.style.display='none'">` : ''}
+    `;
+    document.getElementById('req-modal-actions').innerHTML = req.status==='pending'
+      ? `<button class="btn btn-approve" onclick="approveRequest('${req.id}');closeModal('modal-request')">✓ Approve & Create Account</button>
+         <button class="btn btn-reject" onclick="rejectRequest('${req.id}');closeModal('modal-request')">✗ Reject</button>`
+      : `<div style="color:var(--text3); font-size:13px;">Status: <strong>${req.status}</strong></div>`;
+    openModal('modal-request');
+  };
+
+  window.approveRequest = async function(id) {
+    const req = allRequests.find(r=>r.id===id);
+    if (!req) return;
+    const password = genPassword();
+    // Create athlete account
+    try {
+      const r = await fetch(`${SB_URL}/rest/v1/athletes`, {
+        method: 'POST',
+        headers: { ...H, 'Prefer':'return=minimal' },
+        body: JSON.stringify({
+          name: req.name, phone: req.phone, email: req.email,
+          password: password, trainer_id: TRAINER.id,
+          goal: req.goal, current_weight: req.current_weight,
+          target_weight: req.target_weight, age: req.age,
+          gender: req.gender, status: 'active',
+          workout_preference: req.workout_preference,
+          diet_preference: req.diet_preference
+        })
+      });
+      // Update request status
+      await fetch(`${SB_URL}/rest/v1/signup_requests?id=eq.${id}`, {
+        method: 'PATCH', headers: H,
+        body: JSON.stringify({ status: 'approved', approved_at: new Date().toISOString() })
+      });
+      // Update local state
+      const idx = allRequests.findIndex(r=>r.id===id);
+      if (idx>=0) allRequests[idx].status = 'approved';
+      const card = document.getElementById(`req-${id}`);
+      if (card) card.querySelector('.status-pill').className = 'status-pill approved';
+      if (card) card.querySelector('.status-pill').textContent = 'APPROVED';
+      await loadAthletes();
+      renderOverview();
+      toast(`✓ ${req.name} approved! Password: ${password}`, 'success');
+      // Show credentials
+      setTimeout(() => alert(`Athlete Created!\n\nName: ${req.name}\nPhone: ${req.phone}\nPassword: ${password}\n\nShare these credentials with the athlete.`), 500);
+    } catch(e) { toast('Error approving request', 'error'); }
+  };
+
+  window.rejectRequest = async function(id) {
+    if (!confirm('Reject this application?')) return;
+    await fetch(`${SB_URL}/rest/v1/signup_requests?id=eq.${id}`, {
+      method: 'PATCH', headers: H,
+      body: JSON.stringify({ status: 'rejected' })
+    });
+    const idx = allRequests.findIndex(r=>r.id===id);
+    if (idx>=0) allRequests[idx].status = 'rejected';
+    const card = document.getElementById(`req-${id}`);
+    if (card) {
+      card.querySelector('.status-pill').className = 'status-pill rejected';
+      card.querySelector('.status-pill').textContent = 'REJECTED';
+      card.querySelector('.request-actions').innerHTML = '';
+    }
+    toast('Request rejected', '');
+  };
+
+  // ── Athletes Page ──
+  function renderAthletes() {
+    const list = document.getElementById('athletes-list');
+    if (!allAthletes.length) {
+      list.innerHTML = `<div class="empty-state"><div class="icon">👥</div><div class="title">No athletes yet</div><div class="sub">Approve a signup request or create one manually.</div></div>`;
+      return;
+    }
+    list.innerHTML = allAthletes.map(a => `
+      <div class="athlete-row glass" onclick="openAthlete('${a.id}')">
+        <div class="athlete-avatar">${a.name[0]}</div>
+        <div class="athlete-info">
+          <div class="athlete-name">${a.name}</div>
+          <div class="athlete-meta">${a.phone} · ${(a.goal||'').replace('_',' ')} · ${a.current_weight||'?'} kg</div>
+        </div>
+        <div class="athlete-status">
+          <span class="status-pill ${a.status==='active'?'approved':'pending'}">${(a.status||'pending').toUpperCase()}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.openAthlete = function(id) {
+    const a = allAthletes.find(x=>x.id===id);
+    if (!a) return;
+    document.getElementById('ath-modal-name').textContent = a.name;
+    document.getElementById('ath-modal-body').innerHTML = `
+      <div class="request-info" style="grid-template-columns:1fr 1fr; margin-bottom:16px;">
+        <div class="info-row"><div class="info-label">Phone</div><div class="info-val">${a.phone}</div></div>
+        <div class="info-row"><div class="info-label">Email</div><div class="info-val">${a.email||'—'}</div></div>
+        <div class="info-row"><div class="info-label">Goal</div><div class="info-val">${(a.goal||'—').replace('_',' ')}</div></div>
+        <div class="info-row"><div class="info-label">Current Weight</div><div class="info-val">${a.current_weight||'—'} kg</div></div>
+        <div class="info-row"><div class="info-label">Target Weight</div><div class="info-val">${a.target_weight||'—'} kg</div></div>
+        <div class="info-row"><div class="info-label">Status</div><div class="info-val">${a.status}</div></div>
+      </div>
+      <div class="divider"></div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="openPlanEditor('${a.id}','workout')">🏋️ Edit Workout Plan</button>
+        <button class="btn btn-primary" onclick="openPlanEditor('${a.id}','diet')">🥗 Edit Diet Plan</button>
+        <button class="btn btn-view" onclick="closeModal('modal-athlete');openChat('${a.id}')">💬 Message</button>
+        <button class="btn btn-view" onclick="editHabits('${a.id}')">📋 Edit Habits</button>
+      </div>
+    `;
+    openModal('modal-athlete');
+  };
+
+  // ── Plan Editor ──
+  const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  let planEditorAthlete = null;
+  let planEditorType = 'workout';
+  let planEditorDay = 1;
+  let planEditorData = {};
+
+  window.openPlanEditor = async function(athleteId, type) {
+    closeModal('modal-athlete');
+    planEditorAthlete = allAthletes.find(a=>a.id===athleteId);
+    planEditorType = type;
+    planEditorDay = 1;
+    planEditorData = JSON.parse(JSON.stringify(planEditorAthlete[type+'_plan'] || {}));
+
+    document.getElementById('plan-modal-title').textContent =
+      `${planEditorAthlete.name} · ${type==='workout'?'Workout':'Diet'} Plan`;
+
+    renderPlanEditor();
+    openModal('modal-plan');
+  };
+
+  function renderPlanEditor() {
+    const body = document.getElementById('plan-modal-body');
+    const dayData = planEditorData[planEditorDay] || {};
+
+    let tabsHTML = `<div class="plan-day-tab">` +
+      DAYS.map((d,i) => `<div class="day-tab${i===planEditorDay?' active':''}" onclick="setPlanDay(${i})">${d.slice(0,3)}</div>`).join('') +
+      `</div>`;
+
+    let editorHTML = '';
+    if (planEditorType === 'workout') {
+      const exercises = dayData.exercises || [];
+      editorHTML = `
+        <div class="field-group">
+          <div class="field-label">Session Title</div>
+          <input class="field-input" id="plan-title" value="${dayData.title||''}" placeholder="e.g. Push Day, Leg Day, Rest Day">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Note (optional)</div>
+          <input class="field-input" id="plan-note" value="${dayData.note||''}" placeholder="e.g. Focus on form today">
+        </div>
+        <div class="field-label" style="margin-bottom:10px;">Exercises</div>
+        <div id="exercises-list">
+          ${exercises.map((ex,i) => exerciseRowHTML(ex,i)).join('')}
+        </div>
+        <button class="btn btn-view" onclick="addExercise()" style="margin-top:8px; width:100%;">+ Add Exercise</button>
+        <button class="btn btn-primary" onclick="savePlan()" style="margin-top:12px; width:100%; padding:14px; border-radius:16px;">Save Plan</button>
+      `;
+    } else {
+      const meals = dayData.meals || [];
+      editorHTML = `
+        <div class="field-group">
+          <div class="field-label">Total Calories (optional)</div>
+          <input class="field-input" id="plan-calories" type="number" value="${dayData.total_calories||''}" placeholder="2000">
+        </div>
+        <div class="field-label" style="margin-bottom:10px;">Meals</div>
+        <div id="meals-list">
+          ${meals.map((m,i) => mealRowHTML(m,i)).join('')}
+        </div>
+        <button class="btn btn-view" onclick="addMeal()" style="margin-top:8px; width:100%;">+ Add Meal</button>
+        <button class="btn btn-primary" onclick="savePlan()" style="margin-top:12px; width:100%; padding:14px; border-radius:16px;">Save Diet Plan</button>
+      `;
+    }
+
+    body.innerHTML = tabsHTML + editorHTML;
+  }
+
+  function exerciseRowHTML(ex, i) {
+    return `<div class="glass" style="border-radius:14px; padding:14px; margin-bottom:8px;" id="ex-row-${i}">
+      <div class="fields-row" style="margin-bottom:8px;">
+        <div class="field-group" style="margin-bottom:0;">
+          <div class="field-label">Exercise Name</div>
+          <input class="field-input" id="ex-name-${i}" value="${ex.name||''}" placeholder="Bench Press">
+        </div>
+        <div class="field-group" style="margin-bottom:0;">
+          <div class="field-label">Sets × Reps</div>
+          <input class="field-input" id="ex-sets-${i}" value="${ex.sets||''}" placeholder="4 × 12">
+        </div>
+      </div>
+      <div class="fields-row">
+        <div class="field-group" style="margin-bottom:0;">
+          <div class="field-label">Rest</div>
+          <input class="field-input" id="ex-rest-${i}" value="${ex.rest||''}" placeholder="60s">
+        </div>
+        <div style="display:flex; align-items:flex-end;">
+          <button class="btn btn-reject" onclick="removeExercise(${i})" style="width:100%; padding:10px;">Remove</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function mealRowHTML(m, i) {
+    return `<div class="glass" style="border-radius:14px; padding:14px; margin-bottom:8px;" id="meal-row-${i}">
+      <div class="fields-row" style="margin-bottom:8px;">
+        <div class="field-group" style="margin-bottom:0;">
+          <div class="field-label">Meal Name</div>
+          <input class="field-input" id="meal-name-${i}" value="${m.name||''}" placeholder="Breakfast">
+        </div>
+        <div class="field-group" style="margin-bottom:0;">
+          <div class="field-label">Time</div>
+          <input class="field-input" id="meal-time-${i}" value="${m.time||''}" placeholder="8:00 AM">
+        </div>
+      </div>
+      <div class="field-group" style="margin-bottom:8px;">
+        <div class="field-label">Food Items (comma separated)</div>
+        <input class="field-input" id="meal-items-${i}" value="${Array.isArray(m.items)?m.items.join(', '):(m.items||'')}" placeholder="Oats, Banana, Milk">
+      </div>
+      <div class="fields-row">
+        <input class="field-input" id="meal-cal-${i}" type="number" value="${m.calories||''}" placeholder="Kcal">
+        <input class="field-input" id="meal-p-${i}" type="number" value="${m.protein||''}" placeholder="Protein g">
+        <input class="field-input" id="meal-c-${i}" type="number" value="${m.carbs||''}" placeholder="Carbs g">
+        <button class="btn btn-reject" onclick="removeMeal(${i})" style="padding:10px;">✕</button>
+      </div>
+    </div>`;
+  }
+
+  window.setPlanDay = function(day) {
+    // Save current day first
+    collectCurrentPlanDay();
+    planEditorDay = day;
+    renderPlanEditor();
+  };
+
+  function collectCurrentPlanDay() {
+    if (planEditorType === 'workout') {
+      const title = document.getElementById('plan-title')?.value||'';
+      const note = document.getElementById('plan-note')?.value||'';
+      const exercises = [];
+      let i = 0;
+      while (document.getElementById(`ex-name-${i}`)) {
+        exercises.push({
+          name: document.getElementById(`ex-name-${i}`).value,
+          sets: document.getElementById(`ex-sets-${i}`).value,
+          rest: document.getElementById(`ex-rest-${i}`).value,
+        });
+        i++;
+      }
+      planEditorData[planEditorDay] = { title, note, exercises };
+    } else {
+      const total_calories = document.getElementById('plan-calories')?.value||'';
+      const meals = [];
+      let i = 0;
+      while (document.getElementById(`meal-name-${i}`)) {
+        meals.push({
+          name: document.getElementById(`meal-name-${i}`).value,
+          time: document.getElementById(`meal-time-${i}`).value,
+          items: document.getElementById(`meal-items-${i}`).value.split(',').map(s=>s.trim()).filter(Boolean),
+          calories: document.getElementById(`meal-cal-${i}`)?.value||'',
+          protein: document.getElementById(`meal-p-${i}`)?.value||'',
+          carbs: document.getElementById(`meal-c-${i}`)?.value||'',
+        });
+        i++;
+      }
+      planEditorData[planEditorDay] = { meals, total_calories };
+    }
+  }
+
+  window.addExercise = function() {
+    collectCurrentPlanDay();
+    const exercises = planEditorData[planEditorDay]?.exercises || [];
+    exercises.push({ name:'', sets:'', rest:'' });
+    planEditorData[planEditorDay] = { ...(planEditorData[planEditorDay]||{}), exercises };
+    renderPlanEditor();
+  };
+  window.removeExercise = function(i) {
+    collectCurrentPlanDay();
+    planEditorData[planEditorDay].exercises.splice(i,1);
+    renderPlanEditor();
+  };
+  window.addMeal = function() {
+    collectCurrentPlanDay();
+    const meals = planEditorData[planEditorDay]?.meals || [];
+    meals.push({ name:'', time:'', items:[] });
+    planEditorData[planEditorDay] = { ...(planEditorData[planEditorDay]||{}), meals };
+    renderPlanEditor();
+  };
+  window.removeMeal = function(i) {
+    collectCurrentPlanDay();
+    planEditorData[planEditorDay].meals.splice(i,1);
+    renderPlanEditor();
+  };
+
+  window.savePlan = async function() {
+    collectCurrentPlanDay();
+    const field = planEditorType + '_plan';
+    try {
+      await fetch(`${SB_URL}/rest/v1/athletes?id=eq.${planEditorAthlete.id}`, {
+        method: 'PATCH', headers: H,
+        body: JSON.stringify({ [field]: planEditorData })
+      });
+      // Update local
+      const idx = allAthletes.findIndex(a=>a.id===planEditorAthlete.id);
+      if (idx>=0) allAthletes[idx][field] = planEditorData;
+      closeModal('modal-plan');
+      toast(`✓ ${planEditorType} plan saved!`, 'success');
+    } catch(e) { toast('Error saving plan', 'error'); }
+  };
+
+  // ── Habits Editor ──
+  window.editHabits = function(id) {
+    const a = allAthletes.find(x=>x.id===id);
+    closeModal('modal-athlete');
+    const habits = a.habit_list || [];
+    const body = `
+      <div class="modal" style="max-width:480px;">
+        <button class="modal-close" onclick="closeModal('modal-plan')">✕</button>
+        <div class="modal-title">📋 ${a.name}'s Habits</div>
+        <div id="habits-editor">
+          ${habits.map((h,i) => `<div style="display:flex; gap:8px; margin-bottom:8px;">
+            <input class="field-input" id="habit-${i}" value="${h.name||h}" style="flex:1;">
+            <button class="btn btn-reject" onclick="removeHabitRow(${i})">✕</button>
+          </div>`).join('')}
+          <div id="habit-rows"></div>
+        </div>
+        <button class="btn btn-view" onclick="addHabitRow()" style="width:100%; margin-top:8px;">+ Add Habit</button>
+        <button class="btn btn-primary" onclick="saveHabits('${id}',${habits.length})" style="width:100%; margin-top:10px; padding:14px; border-radius:16px;">Save Habits</button>
+      </div>`;
+    document.querySelector('#modal-plan .modal').outerHTML = body;
+    // Actually just reuse the plan modal body
+    document.getElementById('plan-modal-title').textContent = `📋 ${a.name}'s Habits`;
+    document.getElementById('plan-modal-body').innerHTML = `
+      <div id="habits-editor">
+        ${habits.map((h,i) => `<div style="display:flex; gap:8px; margin-bottom:8px;" id="habit-row-${i}">
+          <input class="field-input" id="habit-${i}" value="${h.name||h}" style="flex:1;" placeholder="e.g. 10,000 steps">
+          <button class="btn btn-reject" onclick="this.closest('[id]').remove()" style="padding:10px 14px;">✕</button>
+        </div>`).join('')}
+      </div>
+      <button class="btn btn-view" onclick="addHabitRow()" style="width:100%; margin-top:8px;">+ Add Habit</button>
+      <button class="btn btn-primary" onclick="saveHabits('${id}')" style="width:100%; margin-top:10px; padding:14px; border-radius:16px;">Save Habits</button>
+    `;
+    openModal('modal-plan');
+  };
+
+  let habitRowCount = 100;
+  window.addHabitRow = function() {
+    const container = document.getElementById('habits-editor');
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex; gap:8px; margin-bottom:8px;';
+    div.innerHTML = `<input class="field-input habit-input" value="" style="flex:1;" placeholder="New habit...">
+      <button class="btn btn-reject" onclick="this.parentElement.remove()" style="padding:10px 14px;">✕</button>`;
+    container.appendChild(div);
+  };
+
+  window.saveHabits = async function(athleteId) {
+    const inputs = document.querySelectorAll('#habits-editor input');
+    const habits = Array.from(inputs).map(inp=>({name:inp.value.trim()})).filter(h=>h.name);
+    try {
+      await fetch(`${SB_URL}/rest/v1/athletes?id=eq.${athleteId}`, {
+        method: 'PATCH', headers: H,
+        body: JSON.stringify({ habit_list: habits })
+      });
+      const idx = allAthletes.findIndex(a=>a.id===athleteId);
+      if (idx>=0) allAthletes[idx].habit_list = habits;
+      closeModal('modal-plan');
+      toast(`✓ Habits saved!`, 'success');
+    } catch(e) { toast('Error saving habits', 'error'); }
+  };
+
+  // ── Messages / Chat ──
+  function renderChatThreads() {
+    const container = document.getElementById('chat-threads');
+    // Get unique athletes who've messaged
+    const athleteIds = [...new Set(allMessages.map(m=>m.athlete_id))];
+    if (!athleteIds.length) {
+      container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text3); font-size:13px;">No conversations yet</div>';
+      return;
+    }
+    container.innerHTML = athleteIds.map(aid => {
+      const ath = allAthletes.find(a=>a.id===aid);
+      const lastMsg = allMessages.find(m=>m.athlete_id===aid);
+      const hasUnread = allMessages.some(m=>m.athlete_id===aid && m.sender==='athlete');
+      return `<div class="chat-thread${activeThread===aid?' active':''}" onclick="openChat('${aid}')">
+        <div class="thread-avatar">${(ath?.name||'?')[0]}</div>
+        <div class="thread-info">
+          <div class="thread-name">${ath?.name||'Unknown'}</div>
+          <div class="thread-preview">${lastMsg?.message||'No messages'}</div>
+        </div>
+        ${hasUnread?'<div class="thread-unread"></div>':''}
+      </div>`;
+    }).join('');
+  }
+
+  window.openChat = async function(athleteId) {
+    activeThread = athleteId;
+    switchPage('messages', document.querySelector('[onclick*="messages"]'));
+    renderChatThreads();
+
+    const ath = allAthletes.find(a=>a.id===athleteId);
+    const main = document.getElementById('chat-main-col');
+
+    main.innerHTML = `
+      <div class="chat-header glass" style="border-radius:0; border:0; outline:none; box-shadow:none; border-bottom:1px solid rgba(255,255,255,0.07);">
+        <div class="thread-avatar">${(ath?.name||'?')[0]}</div>
+        <div>
+          <div style="font-size:15px; font-weight:700;">${ath?.name||'Unknown'}</div>
+          <div style="font-size:12px; color:var(--text3);">${ath?.phone||''}</div>
+        </div>
+      </div>
+      <div class="chat-messages" id="chat-msgs-${athleteId}">
+        <div class="loader" style="margin:auto;"></div>
+      </div>
+      <div class="chat-input-row">
+        <input class="chat-input" type="text" id="chat-input-field" placeholder="Message ${ath?.name||'athlete'}..." onkeydown="if(event.key==='Enter')sendTrainerMsg('${athleteId}')">
+        <button class="chat-send-btn" onclick="sendTrainerMsg('${athleteId}')">↑</button>
+      </div>
+    `;
+
+    // Load this athlete's messages
+    const r = await fetch(`${SB_URL}/rest/v1/messages?athlete_id=eq.${athleteId}&order=created_at.asc`, { headers: H });
+    const msgs = await r.json() || [];
+    const msgContainer = document.getElementById(`chat-msgs-${athleteId}`);
+    if (!msgs.length) {
+      msgContainer.innerHTML = '<div style="margin:auto; color:var(--text3); font-size:14px;">No messages yet</div>';
+    } else {
+      msgContainer.innerHTML = msgs.map(m => `
+        <div class="chat-bubble ${m.sender}">
+          ${m.message}
+          <div class="bubble-time">${new Date(m.created_at).toLocaleString('en-IN',{dateStyle:'short',timeStyle:'short'})}</div>
+        </div>
+      `).join('');
+      setTimeout(()=>msgContainer.scrollTop=msgContainer.scrollHeight, 100);
+    }
+  };
+
+  window.sendTrainerMsg = async function(athleteId) {
+    const input = document.getElementById('chat-input-field');
+    const msg = input.value.trim();
+    if (!msg) return;
+    input.value = '';
+    await fetch(`${SB_URL}/rest/v1/messages`, {
+      method: 'POST',
+      headers: { ...H, 'Prefer':'return=minimal' },
+      body: JSON.stringify({ athlete_id: athleteId, trainer_id: TRAINER.id, sender: 'trainer', message: msg })
+    });
+    openChat(athleteId);
+  };
+
+  // ── Create Athlete ──
+  window.createAthlete = async function() {
+    const name = document.getElementById('c-name').value.trim();
+    const phone = document.getElementById('c-phone').value.trim().replace(/\s+/g,'');
+    const email = document.getElementById('c-email').value.trim();
+    const password = document.getElementById('c-password').value.trim() || genPassword();
+    const weight = document.getElementById('c-weight').value;
+    const target = document.getElementById('c-target').value;
+    const goal = document.getElementById('c-goal').value;
+    const age = document.getElementById('c-age').value;
+
+    if (!name || !phone) { toast('Name and phone are required', 'error'); return; }
+
+    try {
+      await fetch(`${SB_URL}/rest/v1/athletes`, {
+        method: 'POST',
+        headers: { ...H, 'Prefer':'return=minimal' },
+        body: JSON.stringify({
+          name, phone, email, password,
+          trainer_id: TRAINER.id, goal, age: parseInt(age)||null,
+          current_weight: parseFloat(weight)||null,
+          target_weight: parseFloat(target)||null,
+          status: 'active'
+        })
+      });
+      await loadAthletes();
+      toast(`✓ ${name} created!`, 'success');
+      alert(`Athlete Created!\n\nName: ${name}\nPhone: ${phone}\nPassword: ${password}\n\nShare these credentials with the athlete.`);
+      // Clear form
+      ['c-name','c-phone','c-email','c-weight','c-target','c-age'].forEach(id => document.getElementById(id).value='');
+    } catch(e) { toast('Error creating athlete', 'error'); }
+  };
+
+  // ── Navigation ──
+  window.switchPage = function(name, el) {
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-link, .mob-nav-item').forEach(n=>n.classList.remove('active'));
+    document.getElementById('page-'+name).classList.add('active');
+    if (el) el.classList.add('active');
+
+    if (name === 'requests') renderRequests();
+    if (name === 'athletes') renderAthletes();
+    if (name === 'messages') renderChatThreads();
+  };
+
+  window.doLogout = function() {
+    if (confirm('Log out?')) {
+      localStorage.removeItem('pace2_trainer_session');
+      window.location.href = 'trainer-login.html';
+    }
+  };
+
+  // ── Modals ──
+  window.openModal = function(id) { document.getElementById(id).classList.add('open'); };
+  window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); };
+  document.querySelectorAll('.modal-overlay').forEach(o => {
+    o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); });
+  });
+
+  // ── Toast ──
+  window.toast = function(msg, type='') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'toast show '+type;
+    setTimeout(()=>t.className='toast', 3000);
+  };
+
+  // ── Helpers ──
+  function timeAgo(iso) {
+    const diff = Date.now() - new Date(iso);
+    const m = Math.floor(diff/60000);
+    if (m<1) return 'just now';
+    if (m<60) return m+'m ago';
+    if (m<1440) return Math.floor(m/60)+'h ago';
+    return Math.floor(m/1440)+'d ago';
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
