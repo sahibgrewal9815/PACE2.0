@@ -15,7 +15,7 @@
     --bg: #060608;
     --glass: rgba(255,255,255,0.04);
     --glass2: rgba(255,255,255,0.07);
-    --glassbg: rgba(12,12,16,0.55);
+    --glassbg: rgba(8,8,12,0.4);
     --border: rgba(255,255,255,0.08);
     --border2: rgba(255,255,255,0.12);
     --acc: #FF5500;
@@ -39,28 +39,43 @@
     overflow-x: hidden;
   }
 
+  /* Rich background so glass has something to blur against */
+  body {
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 20%, rgba(255,85,0,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 60% at 80% 80%, rgba(255,140,0,0.12) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 40% at 50% 50%, rgba(120,40,0,0.15) 0%, transparent 65%),
+      #060608;
+  }
+
   /* Ambient background blobs */
   body::before {
     content: '';
     position: fixed;
-    top: -20%;
-    left: -10%;
-    width: 70vw;
-    height: 70vw;
-    background: radial-gradient(circle, rgba(255,85,0,0.12) 0%, transparent 65%);
+    top: 10%;
+    left: -20%;
+    width: 80vw;
+    height: 80vw;
+    background: radial-gradient(circle, rgba(255,85,0,0.22) 0%, rgba(180,40,0,0.1) 40%, transparent 70%);
     pointer-events: none;
     z-index: 0;
+    animation: blobMove 8s ease-in-out infinite alternate;
   }
   body::after {
     content: '';
     position: fixed;
-    bottom: -20%;
-    right: -10%;
-    width: 60vw;
-    height: 60vw;
-    background: radial-gradient(circle, rgba(255,140,0,0.08) 0%, transparent 65%);
+    bottom: 5%;
+    right: -20%;
+    width: 70vw;
+    height: 70vw;
+    background: radial-gradient(circle, rgba(255,120,0,0.16) 0%, rgba(100,30,0,0.08) 40%, transparent 65%);
     pointer-events: none;
     z-index: 0;
+    animation: blobMove 10s ease-in-out infinite alternate-reverse;
+  }
+  @keyframes blobMove {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(5%, 5%) scale(1.08); }
   }
 
   /* ── SCREENS ── */
@@ -122,27 +137,31 @@
   .back-btn {
     width: 42px; height: 42px;
     border-radius: 50%;
-    background: rgba(10,10,14,0.5);
-    backdrop-filter: blur(32px);
-    -webkit-backdrop-filter: blur(32px);
-    border: 1px solid var(--border);
-    border-top-color: rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 0;
+    outline: 1px solid rgba(255,255,255,0.18);
+    outline-offset: -1px;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;
-    color: var(--text2);
+    color: rgba(255,255,255,0.7);
     font-size: 18px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(0,0,0,0.3);
   }
   .step-pill {
-    background: rgba(10,10,14,0.5);
-    backdrop-filter: blur(32px);
-    -webkit-backdrop-filter: blur(32px);
-    border: 1px solid var(--border);
-    border-top-color: rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 0;
+    outline: 1px solid rgba(255,255,255,0.18);
+    outline-offset: -1px;
     border-radius: 20px;
     padding: 7px 16px;
     font-size: 12px;
     font-weight: 700;
-    color: var(--text2);
+    color: rgba(255,255,255,0.6);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 0 rgba(0,0,0,0.3);
   }
 
   /* Progress bar */
@@ -198,21 +217,23 @@
     align-items: center;
     gap: 14px;
     padding: 17px 18px;
-    background: var(--glassbg);
-    backdrop-filter: blur(32px);
-    -webkit-backdrop-filter: blur(32px);
-    border: 1px solid var(--border);
-    border-top-color: rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 0;
+    outline: 1px solid rgba(255,255,255,0.14);
+    outline-offset: -1px;
     border-radius: 18px;
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.16,1,0.3,1);
     position: relative;
     overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.25);
   }
   .option-card.selected {
-    border-color: rgba(255,85,0,0.3);
-    border-top-color: rgba(255,85,0,0.5);
-    background: rgba(255,55,0,0.08);
+    outline-color: rgba(255,85,0,0.5);
+    background: rgba(255,55,0,0.1);
+    box-shadow: inset 0 1px 0 rgba(255,120,0,0.3), inset 0 -1px 0 rgba(0,0,0,0.25), 0 0 20px rgba(255,85,0,0.1);
   }
   .option-emoji { font-size: 24px; flex-shrink: 0; }
   .option-text {
@@ -253,11 +274,13 @@
   .input-field {
     width: 100%;
     padding: 16px 18px;
-    background: rgba(10,10,14,0.5);
-    backdrop-filter: blur(32px);
-    -webkit-backdrop-filter: blur(32px);
-    border: 1px solid var(--border);
-    border-top-color: rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 0;
+    outline: 1px solid rgba(255,255,255,0.14);
+    outline-offset: -1px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.2);
     border-radius: 16px;
     color: var(--text);
     font-size: 16px;
@@ -270,8 +293,8 @@
   .input-field::placeholder { color: var(--text3); }
   .input-field:focus {
     border-color: rgba(255,85,0,0.4);
-    border-top-color: rgba(255,85,0,0.6);
-    background: rgba(14,10,10,0.6);
+    border-top-color: rgba(255,120,0,0.7);
+    background: rgba(10,6,6,0.4);
   }
   .input-row {
     display: grid;
@@ -340,18 +363,20 @@
   .btn-ghost {
     width: 100%;
     padding: 17px;
-    background: rgba(10,10,14,0.5);
-    backdrop-filter: blur(32px);
-    -webkit-backdrop-filter: blur(32px);
-    border: 1px solid var(--border);
-    border-top-color: rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 0;
+    outline: 1px solid rgba(255,255,255,0.18);
+    outline-offset: -1px;
     border-radius: 18px;
-    color: var(--text2);
+    color: rgba(255,255,255,0.7);
     font-size: 15px;
     font-weight: 600;
     font-family: 'Inter', sans-serif;
     cursor: pointer;
     transition: all 0.2s;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(0,0,0,0.3);
   }
   .btn-ghost:active { transform: scale(0.98); }
 
