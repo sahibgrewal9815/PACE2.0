@@ -776,9 +776,13 @@ body::after {
      PAGE: WORKOUT
 ══════════════════════════════════════ -->
 <div class="page" id="page-workout">
-  <div style="margin-bottom:24px;">
+  <div style="margin-bottom:16px;">
     <div class="greeting">Today is</div>
     <div class="athlete-name" id="workout-day-display">—</div>
+  </div>
+
+  <!-- Day picker -->
+  <div id="workout-day-picker" style="display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:16px; scrollbar-width:none;">
   </div>
 
   <div id="workout-content">
@@ -790,9 +794,13 @@ body::after {
      PAGE: DIET
 ══════════════════════════════════════ -->
 <div class="page" id="page-diet">
-  <div style="margin-bottom:24px;">
+  <div style="margin-bottom:16px;">
     <div class="greeting">Fuel your body</div>
-    <div class="athlete-name">Today's Diet</div>
+    <div class="athlete-name" id="diet-day-display">Today's Diet</div>
+  </div>
+
+  <!-- Day picker -->
+  <div id="diet-day-picker" style="display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:16px; scrollbar-width:none;">
   </div>
 
   <div id="diet-content">
@@ -893,7 +901,10 @@ body::after {
   let TODAY_LOG = null;
   let sleepVal = 7.0;
   const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const DAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const DOW = new Date().getDay();
+  let viewDOW = DOW;     // which day is being viewed in workout
+  let viewDietDOW = DOW; // which day is being viewed in diet
   const TODAY = new Date().toISOString().split('T')[0];
 
   // ── Session check ──
@@ -1087,26 +1098,55 @@ body::after {
   }
 
   // ── Workout page ──
+  function buildDayPicker() {
+    const wp = ATHLETE.workout_plan || {};
+    const picker = document.getElementById('workout-day-picker');
+    if (!picker) return;
+    picker.innerHTML = DAYS_SHORT.map((d, i) => {
+      const dayPlan = wp[String(i)];
+      const isRest = !dayPlan || !dayPlan.exercises || !dayPlan.exercises.length;
+      const isToday = i === DOW;
+      const isActive = i === viewDOW;
+      return `<div onclick="switchWorkoutDay(${i})" style="
+        flex:0 0 auto; padding:8px 14px; border-radius:30px; font-size:12px; font-weight:600;
+        cursor:pointer; white-space:nowrap; transition:all 0.2s;
+        background:${isActive ? 'var(--acc)' : 'rgba(255,255,255,0.06)'};
+        color:${isActive ? '#fff' : (isToday ? 'var(--acc2)' : 'var(--text2)')};
+        border: 1px solid ${isActive ? 'transparent' : (isToday ? 'rgba(255,140,0,0.3)' : 'rgba(255,255,255,0.08)')};
+        opacity:${isRest ? '0.5' : '1'};
+      ">${d}${isToday ? ' •' : ''}</div>`;
+    }).join('');
+  }
+
+  window.switchWorkoutDay = function(d) {
+    viewDOW = d;
+    buildDayPicker();
+    renderWorkout();
+  };
+
   function renderWorkout() {
     const container = document.getElementById('workout-content');
     const wp = ATHLETE.workout_plan || {};
-    const todayWorkout = wp[String(DOW)];
+    const todayWorkout = wp[String(viewDOW)];
+
+    buildDayPicker();
 
     if (!Object.keys(wp).length) {
       container.innerHTML = `<div class="no-plan"><div class="icon">💪</div><div class="title">No workout plan yet</div><div class="sub">Your trainer is building your personalised workout. Check back soon!</div></div>`;
       return;
     }
 
-    if (!todayWorkout || todayWorkout.title === 'Rest Day') {
-      container.innerHTML = `<div class="no-plan"><div class="icon">🛋️</div><div class="title">Rest Day</div><div class="sub">Recovery is part of training. Rest up and come back stronger tomorrow.</div></div>`;
+    if (!todayWorkout || !todayWorkout.exercises || !todayWorkout.exercises.length) {
+      container.innerHTML = `<div class="no-plan"><div class="icon">🛋️</div><div class="title">Rest Day — ${DAYS[viewDOW]}</div><div class="sub">Recovery is part of training. Rest up and come back stronger tomorrow.</div></div>`;
       return;
     }
 
-    const doneSets = TODAY_LOG?.habits?.done_exercises || {};
+    const doneSets = (viewDOW === DOW) ? (TODAY_LOG?.habits?.done_exercises || {}) : {};
     let html = `<div class="glass" style="border-radius:24px; padding:20px; margin-bottom:16px;">
-      <div class="workout-day-label">${DAYS[DOW].toUpperCase()}</div>
+      <div class="workout-day-label">${DAYS[viewDOW].toUpperCase()}${viewDOW === DOW ? ' — TODAY' : ''}</div>
       <div class="workout-title">${todayWorkout.title}</div>
       ${todayWorkout.note ? `<div style="font-size:13px; color:var(--text2); margin-top:6px;">${todayWorkout.note}</div>` : ''}
+      ${todayWorkout.tags && todayWorkout.tags.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">${todayWorkout.tags.map(t=>`<span style="font-size:10px;padding:3px 10px;border-radius:20px;background:rgba(255,85,0,0.15);color:var(--acc);border:1px solid rgba(255,85,0,0.2)">${t}</span>`).join('')}</div>` : ''}
     </div>`;
 
     if (todayWorkout.exercises && todayWorkout.exercises.length) {
@@ -1143,10 +1183,37 @@ body::after {
   };
 
   // ── Diet page ──
+  function buildDietDayPicker() {
+    const dp = ATHLETE.diet_plan || {};
+    const picker = document.getElementById('diet-day-picker');
+    if (!picker) return;
+    picker.innerHTML = DAYS_SHORT.map((d, i) => {
+      const isToday = i === DOW;
+      const isActive = i === viewDietDOW;
+      return `<div onclick="switchDietDay(${i})" style="
+        flex:0 0 auto; padding:8px 14px; border-radius:30px; font-size:12px; font-weight:600;
+        cursor:pointer; white-space:nowrap; transition:all 0.2s;
+        background:${isActive ? 'var(--acc)' : 'rgba(255,255,255,0.06)'};
+        color:${isActive ? '#fff' : (isToday ? 'var(--acc2)' : 'var(--text2)')};
+        border: 1px solid ${isActive ? 'transparent' : (isToday ? 'rgba(255,140,0,0.3)' : 'rgba(255,255,255,0.08)')};
+      ">${d}${isToday ? ' •' : ''}</div>`;
+    }).join('');
+  }
+
+  window.switchDietDay = function(d) {
+    viewDietDOW = d;
+    const display = document.getElementById('diet-day-display');
+    if (display) display.textContent = d === DOW ? "Today's Diet" : DAYS[d] + "'s Diet";
+    buildDietDayPicker();
+    renderDiet();
+  };
+
   function renderDiet() {
     const container = document.getElementById('diet-content');
     const dp = ATHLETE.diet_plan || {};
-    const todayDiet = dp[String(DOW)] || dp['default'];
+    const todayDiet = dp[String(viewDietDOW)] || dp['default'];
+
+    buildDietDayPicker();
 
     if (!Object.keys(dp).length) {
       container.innerHTML = `<div class="no-plan"><div class="icon">🥗</div><div class="title">No diet plan yet</div><div class="sub">Your trainer is preparing your personalised nutrition plan. Check back soon!</div></div>`;
