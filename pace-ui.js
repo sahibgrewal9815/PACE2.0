@@ -35,7 +35,7 @@
   P.isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   P.isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
   P.fmt12 = hhmm => { if (!hhmm) return ''; const [h, m] = hhmm.split(':').map(Number); return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`; };
-  P.pips = (n, on) => Array.from({ length: n }, (_, i) => `<i class="${i < on ? 'on' : ''}"></i>`).join('');
+  P.pips = (n, on) => Array.from({ length: n }, (_, i) => `<i class="${i < on ? 'on' : ''}" style="--k:${i}"></i>`).join('');
   P.empty = (t, s = '') => `<div class="empty"><div class="e-dots"></div><div class="e-title">${t}</div>${s ? `<div class="e-sub">${s}</div>` : ''}</div>`;
 
   let toastT;
@@ -78,14 +78,48 @@
       const w = g[0].length;
       for (let row = 0; row < 7; row++) for (let col = 0; col < w; col++) {
         const c = `<circle cx="${(x + col) * cell + cell / 2}" cy="${row * cell + cell / 2}" r="${r}"/>`;
-        if (g[row][col] === '1') { if (ch === ':' && opts.blinkColon) blink += c; else on += c; }
+        if (g[row][col] === '1') {
+          const cc = opts.intro ? c.replace('<circle ', `<circle style="--k:${(x + col) + row * 2}" `) : c;
+          if (ch === ':' && opts.blinkColon) blink += cc; else on += cc;
+        }
         else if (opts.grid !== false && ch !== ' ') off += c;
       }
       x += w + 1;
     }
     const W = Math.max(0, x - 1) * cell, H = 7 * cell;
-    return `<svg class="mx" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" fill="currentColor" role="img" aria-label="${str}">`
+    return `<svg class="mx${opts.intro ? ' intro' : ''}" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" fill="currentColor" role="img" aria-label="${str}">`
       + `<g class="off">${off}</g><g>${on}</g><g class="blink">${blink}</g></svg>`;
+  };
+  // ── Motion helpers ──
+  P.pulse = function (el, cls = 'pulse') {
+    if (typeof el === 'string') el = document.getElementById(el);
+    if (!el) return;
+    el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls);
+    clearTimeout(el['_' + cls]); el['_' + cls] = setTimeout(() => el.classList.remove(cls), 900);
+  };
+  // Count a dot-matrix number from its current value to `to`, then pulse it
+  P.countMx = function (el, to, cell, opts = {}) {
+    if (typeof el === 'string') el = document.getElementById(el);
+    if (!el) return;
+    const from = parseFloat(el.dataset.v), target = Math.round(+to);
+    if (isNaN(from) || from === target || matchMedia('(prefers-reduced-motion: reduce)').matches) { P.setMx(el, target, cell, opts); P.pulse(el); return; }
+    const t0 = performance.now(), dur = Math.min(900, 380 + Math.abs(target - from) * 0.6);
+    cancelAnimationFrame(el._raf);
+    const step = t => {
+      const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      P.setMx(el, Math.round(from + (target - from) * e), cell, opts);
+      if (k < 1) el._raf = requestAnimationFrame(step); else P.pulse(el);
+    };
+    el._raf = requestAnimationFrame(step);
+  };
+  // Little "+520 kcal" that floats up from an element
+  P.floatText = function (anchor, text, color = 'var(--acc)') {
+    if (typeof anchor === 'string') anchor = document.getElementById(anchor);
+    if (!anchor) return;
+    const r = anchor.getBoundingClientRect(), f = document.createElement('div');
+    f.className = 'float-txt'; f.textContent = text; f.style.color = color;
+    f.style.left = (r.left + r.width / 2) + 'px'; f.style.top = (r.top + r.height * 0.3) + 'px';
+    document.body.appendChild(f); setTimeout(() => f.remove(), 1100);
   };
   P.setMx = (el, str, cell, opts) => {
     if (typeof el === 'string') el = document.getElementById(el);
@@ -186,6 +220,7 @@
       sh.addEventListener('touchend', e => { if (y0 !== null && e.changedTouches[0].clientY - y0 > 90) P.closeSheet(); y0 = null; }, { passive: true });
     }
     sh.innerHTML = '<div class="sheet-grab"></div>' + html;
+    Array.from(sh.children).forEach((c, i) => c.style.setProperty('--i', i));
     sh.scrollTop = 0;
     P._onSheetClose = opts.onClose || null;
     requestAnimationFrame(() => { bg.classList.add('open'); sh.classList.add('open'); });

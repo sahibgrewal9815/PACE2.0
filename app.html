@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="pace-ui.css?v=4">
+<link rel="stylesheet" href="pace-ui.css?v=5">
 <style>
 /* ── pages ── */
 .page{display:none;padding:calc(var(--safe-top) + 18px) 16px calc(var(--safe-bot) + 110px);}
@@ -28,7 +28,7 @@
 .top-right{display:flex;align-items:center;gap:10px;}
 .avatar{width:40px;height:40px;border-radius:50%;background:var(--card2);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;
   font-weight:800;font-size:15px;cursor:pointer;}
-.level-badge{position:relative;width:44px;height:44px;flex-shrink:0;}
+.level-badge{position:relative;transform-origin:center;width:44px;height:44px;flex-shrink:0;}
 .level-badge svg{width:44px;height:44px;transform:rotate(-90deg);}
 .lb-bg{fill:none;stroke:rgba(255,255,255,.16);stroke-width:2.6;stroke-dasharray:.01 5.2;stroke-linecap:round;}
 .lb-fg{fill:none;stroke:var(--acc);stroke-width:2.6;stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.16,1,.3,1);}
@@ -99,6 +99,7 @@
 .row-meta{font-family:var(--mono);font-size:10.5px;color:var(--text2);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
 .row-meta .coach{color:var(--purple);}
 .row-meta .bell{color:var(--acc);}
+.row-meta .bell.soon{animation:blink 1.4s ease-in-out infinite;}
 .week7{display:grid;grid-template-columns:repeat(7,6px);gap:3px;flex-shrink:0;}
 .week7 i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.09);}
 .week7 i.on{background:var(--acc);}
@@ -143,7 +144,7 @@
 .meal{position:relative;}
 .meal::before{content:'';position:absolute;left:-18px;top:24px;width:9px;height:9px;border-radius:50%;background:var(--bg);border:1.5px solid var(--text3);}
 .meal.eaten::before{background:var(--green);border-color:var(--green);}
-.meal.next::before{background:var(--acc);border-color:var(--acc);box-shadow:0 0 10px var(--acc);}
+.meal.next::before{background:var(--acc);border-color:var(--acc);box-shadow:0 0 10px var(--acc);color:var(--acc);animation:breathe 2s ease-in-out infinite;}
 .meal.next .w{border-color:var(--acc-line);}
 .meal.eaten .w{border-color:rgba(61,220,132,.25);}
 .meal .w{padding:15px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;}
@@ -193,7 +194,8 @@
 .chart .grid{stroke:rgba(255,255,255,.08);stroke-dasharray:1 4;}
 .chart .ln{fill:none;stroke:var(--acc);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
 .chart .pt{fill:var(--text);}
-.chart .pt.last{fill:var(--acc);}
+.chart .pt.last{fill:var(--acc);animation:ptBreathe 1.8s ease-in-out infinite;transform-box:fill-box;transform-origin:center;}
+@keyframes ptBreathe{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.6)}}
 .chart .lbl{font-family:var(--mono);font-size:8px;fill:var(--text3);}
 .inline-log{display:flex;gap:8px;margin-top:14px;}
 .inline-log .input{flex:1;font-weight:700;text-align:center;}
@@ -326,7 +328,7 @@
       <div class="w-head"><span class="wl"><b>02</b>Habits today</span></div>
       <div class="s-val acc" id="hab-count"></div>
       <div class="s-unit" id="hab-sub">done</div>
-      <div class="pips acc" id="hab-pips"></div>
+      <div class="pips acc sweep" id="hab-pips"></div>
     </div>
     <div class="w water-w" id="water-tile">
       <div class="w-head"><span class="wl"><b>03</b>Water</span><span class="hint" style="color:var(--blue)">TAP +</span></div>
@@ -413,13 +415,13 @@
     <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Coach</span></div>
 </nav>
 
-<script src="pace-ui.js?v=4"></script>
-<script src="nutrition.js?v=4"></script>
+<script src="pace-ui.js?v=5"></script>
+<script src="nutrition.js?v=5"></script>
 <script>
 (function () {
   const P = PACE, esc = P.esc, rest = P.rest, rpc = P.rpc, DAYS = P.DAYS, DS = P.DAYS_SHORT, MONTHS = P.MONTHS;
   P.startDots();
-  P.setMx('loader-logo', 'PACE', 9);
+  P.setMx('loader-logo', 'PACE', 9, { intro: true });
 
   // ── Session ──
   let ATHLETE = null;
@@ -549,6 +551,7 @@
     ATHLETE.habit_list = list;
     if (changed) await saveAthlete({ habit_list: list });
   }
+  const soon = t => { const [hh, mm] = t.split(':').map(Number), now = new Date(), d = hh * 60 + mm - (now.getHours() * 60 + now.getMinutes()); return d >= -30 && d <= 60; };
   const dueToday = h => (h.days && h.days.length ? h.days : [0,1,2,3,4,5,6]).includes(DOW);
   const daysText = d => !d || d.length === 7 ? 'Daily' : (d.join() === '1,2,3,4,5' ? 'Weekdays' : d.join() === '0,6' ? 'Weekends' : d.map(i => DS[i].slice(0, 2)).join(' '));
 
@@ -574,10 +577,10 @@
       const isDue = dueToday(h), isDone = !!TODAY_LOG.habits[h.id];
       const week = last7.map(ds => { const l = LOGS.find(x => x.log_date === ds); return `<i class="${l && l.habits && l.habits[h.id] ? 'on' : ''}"></i>`; }).join('');
       return `<div class="row${isDone ? ' done' : ''}" style="${isDue ? '' : 'opacity:.5'}">
-        <div class="check${isDone ? ' done' : ''}${isDue ? '' : ' locked'}" ${isDue ? `onclick="toggleHabit('${h.id}')"` : ''}>${isDone ? '✓' : ''}</div>
+        <div class="check${isDone ? ' done' : ''}${isDue ? '' : ' locked'}" data-hid="${h.id}" ${isDue ? `onclick="toggleHabit('${h.id}')"` : ''}>${isDone ? '✓' : ''}</div>
         <div class="row-body" onclick="openHabitEditor('${h.id}')">
           <div class="row-name">${h.icon ? h.icon + ' ' : ''}${esc(h.name)}</div>
-          <div class="row-meta">${h.remind && h.time ? `<span class="bell">🔔 ${P.fmt12(h.time)}</span>` : ''}<span>${isDue ? daysText(h.days) : 'Not today'}</span>${h.by === 'trainer' ? '<span class="coach">COACH</span>' : ''}</div>
+          <div class="row-meta">${h.remind && h.time ? `<span class="bell${isDue && !isDone && soon(h.time) ? ' soon' : ''}">🔔 ${P.fmt12(h.time)}</span>` : ''}<span>${isDue ? daysText(h.days) : 'Not today'}</span>${h.by === 'trainer' ? '<span class="coach">COACH</span>' : ''}</div>
         </div>
         <div class="week7">${week}</div>
       </div>`;
@@ -591,8 +594,10 @@
     saveLog({ habits: map });
     const on = !!map[id];
     addXP(on ? 25 : -25);
-    if (on) { P.toast('+25 XP', 'success'); if (navigator.vibrate) navigator.vibrate(10); }
     renderHabitsPage();
+    P.pulse(document.querySelector(`.check[data-hid="${id}"]`), 'pop');
+    P.pulse('hab-count'); P.pulse(document.querySelector('.level-badge'));
+    if (on) { P.floatText(document.querySelector('.level-badge'), '+25 XP'); if (navigator.vibrate) navigator.vibrate(10); }
   };
 
   window.openHabitEditor = function (id) {
@@ -713,7 +718,8 @@
     const cur = Math.round((TODAY_LOG.water_ml || 0) / 250);
     const n = Math.max(0, Math.min(20, cur + delta));
     if (n === cur) { if (delta < 0) P.toast('Already at 0'); return; }
-    TODAY_LOG.water_ml = n * 250; renderWater();
+    TODAY_LOG.water_ml = n * 250; renderWater(); P.pulse('water-val');
+    if (delta > 0 && n <= 8) { const d = document.querySelectorAll('#water-pips i')[n - 1]; if (d) P.pulse(d, 'pop'); }
     const tile = document.getElementById('water-tile'), pop = document.getElementById('water-pop');
     tile.classList.remove('flash-plus', 'flash-minus'); void tile.offsetWidth;
     tile.classList.add(delta > 0 ? 'flash-plus' : 'flash-minus');
@@ -782,7 +788,7 @@
         <div class="hero-title">${esc(w.title)}</div>
         ${w.note ? `<div class="hero-note">${esc(w.note)}</div>` : ''}
         <div class="tags">${(w.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
-        ${isToday ? `<div class="pips acc" id="wk-pips" style="margin-top:16px">${P.pips(n, done)}</div>` : ''}
+        ${isToday ? `<div class="pips acc sweep" id="wk-pips" style="margin-top:16px">${P.pips(n, done)}</div>` : ''}
       </section>` + w.exercises.map((ex, i) => {
         const d = !!doneMap[i];
         return `<div class="row${d ? ' done' : ''}" id="ex-${i}">
@@ -802,7 +808,11 @@
     const w = (ATHLETE.workout_plan || {})[String(DOW)], n = w.exercises.length;
     const done = w.exercises.filter((_, k) => h.done_exercises[k]).length;
     renderWorkout(); renderSession();
-    if (h.done_exercises[i]) P.toast(done === n ? 'Session complete 🔥 +15 XP' : '+15 XP', 'success');
+    P.pulse(document.querySelector(`#ex-${i} .check`), 'pop'); P.pulse('wk-count');
+    if (h.done_exercises[i]) {
+      P.floatText(document.querySelector(`#ex-${i} .check`), '+15 XP');
+      if (done === n) { P.toast('Session complete 🔥', 'success'); document.querySelectorAll('#wk-pips i').forEach(d => P.pulse(d, 'pop')); }
+    }
   };
 
   // ═════════ DIET ═════════
@@ -852,14 +862,14 @@
     const bar = (v, t) => P.pips(20, t ? Math.round(Math.min(1, v / t) * 20) : 0);
     const showEaten = off <= 0;
 
-    let html = `<section class="w tap" onclick="openNutrients()">
+    let html = `<section class="w tap" id="kcal-card" onclick="openNutrients()">
       <div class="w-head"><span class="wl"><b>01</b>${showEaten ? 'Calories eaten' : 'Planned calories'}</span><span class="wl">${meals.length} meals</span></div>
-      <div class="kcal-row"><div style="color:${showEaten ? 'var(--acc)' : 'var(--text)'}">${P.matrix(Math.round(showEaten ? got.kcal : target.kcal), 7)}</div>
+      <div class="kcal-row"><div id="kcal-mx" data-v="${Math.round(showEaten ? got.kcal : target.kcal)}" style="color:${showEaten ? 'var(--acc)' : 'var(--text)'}">${P.matrix(Math.round(showEaten ? got.kcal : target.kcal), 7)}</div>
         <div class="of">${showEaten ? `of ${Math.round(target.kcal)} kcal<br>${Math.max(0, Math.round(target.kcal - got.kcal))} left` : 'kcal target'}</div></div>
-      ${showEaten ? `<div class="seg" style="grid-template-columns:repeat(30,1fr)">${Array.from({ length: 30 }, (_, i) => { const lit = Math.round(Math.min(1, got.kcal / (target.kcal || 1)) * 30); return `<i class="${i < lit - 1 ? 'on' : i === lit - 1 ? 'edge' : ''}"></i>`; }).join('')}</div>` : ''}
-      <div class="mrow p"><span class="ml">P</span><div class="mbar">${bar(showEaten ? got.p : target.p, showEaten ? target.p : (target.p * 4 + target.c * 4 + target.f * 9) / 4)}</div><span class="mv">${showEaten ? `${Math.round(got.p)}/` : ''}${Math.round(target.p)}g</span></div>
-      <div class="mrow c"><span class="ml">C</span><div class="mbar">${bar(showEaten ? got.c : target.c, showEaten ? target.c : (target.p * 4 + target.c * 4 + target.f * 9) / 4)}</div><span class="mv">${showEaten ? `${Math.round(got.c)}/` : ''}${Math.round(target.c)}g</span></div>
-      <div class="mrow f"><span class="ml">F</span><div class="mbar">${bar(showEaten ? got.f : target.f, showEaten ? target.f : (target.p * 4 + target.c * 4 + target.f * 9) / 9)}</div><span class="mv">${showEaten ? `${Math.round(got.f)}/` : ''}${Math.round(target.f)}g</span></div>
+      ${showEaten ? `<div class="seg sweep" style="grid-template-columns:repeat(30,1fr)">${Array.from({ length: 30 }, (_, i) => { const lit = Math.round(Math.min(1, got.kcal / (target.kcal || 1)) * 30); return `<i class="${i < lit - 1 ? 'on' : i === lit - 1 ? 'edge' : ''}" style="--k:${i}"></i>`; }).join('')}</div>` : ''}
+      <div class="mrow p"><span class="ml">P</span><div class="mbar sweep">${bar(showEaten ? got.p : target.p, showEaten ? target.p : (target.p * 4 + target.c * 4 + target.f * 9) / 4)}</div><span class="mv">${showEaten ? `${Math.round(got.p)}/` : ''}${Math.round(target.p)}g</span></div>
+      <div class="mrow c"><span class="ml">C</span><div class="mbar sweep">${bar(showEaten ? got.c : target.c, showEaten ? target.c : (target.p * 4 + target.c * 4 + target.f * 9) / 4)}</div><span class="mv">${showEaten ? `${Math.round(got.c)}/` : ''}${Math.round(target.c)}g</span></div>
+      <div class="mrow f"><span class="ml">F</span><div class="mbar sweep">${bar(showEaten ? got.f : target.f, showEaten ? target.f : (target.p * 4 + target.c * 4 + target.f * 9) / 9)}</div><span class="mv">${showEaten ? `${Math.round(got.f)}/` : ''}${Math.round(target.f)}g</span></div>
       <div class="more"><span>${canTick ? 'TICK MEALS AS YOU EAT' : off > 0 ? 'PLAN AHEAD · PREP TONIGHT' : 'PAST DAY'}</span><b>NUTRIENTS ›</b></div>
     </section>
     <div class="sec">02 · Meals</div><div class="timeline">`;
@@ -869,7 +879,7 @@
     meals.forEach((m, i) => {
       const isE = !!eaten[i];
       const st = isE ? 'eaten' : i === nextIdx ? 'next' : '';
-      html += `<div class="meal ${st}"><div class="w">
+      html += `<div class="meal ${st}" data-i="${i}"><div class="w">
         <div class="meal-main">
           <div class="meal-top"><div style="display:flex;align-items:center;min-width:0"><span class="meal-name">${esc(m.name)}</span>
             ${isE ? '<span class="badge-s ok">EATEN</span>' : i === nextIdx ? '<span class="badge-s next">UP NEXT</span>' : ''}</div>
@@ -880,7 +890,7 @@
             ${m.carbs ? `<span class="mc c">C ${m.carbs}g</span>` : ''}${m.fat ? `<span class="mc f">F ${m.fat}g</span>` : ''}
           </div>
         </div>
-        ${canTick ? `<div class="check${isE ? ' done' : ''}" onclick="toggleMeal(${i})">${isE ? '✓' : ''}</div>` : ''}
+        ${canTick ? `<div class="check${isE ? ' done' : ''}" style="--ring:var(--green)" onclick="toggleMeal(${i})">${isE ? '✓' : ''}</div>` : ''}
       </div></div>`;
     });
     box.innerHTML = html + '</div>';
@@ -893,8 +903,14 @@
     dl.eaten[i] = !dl.eaten[i]; if (!dl.eaten[i]) delete dl.eaten[i];
     log.diet_log = dl;
     const m = dayPlan(dietDate).meals[i];
+    const prev = +(document.getElementById('kcal-mx')?.dataset.v || 0);
     renderDiet();
-    if (dl.eaten[i]) { P.toast(`+${m.calories || 0} kcal logged`, 'success'); if (navigator.vibrate) navigator.vibrate(10); }
+    const k = document.getElementById('kcal-mx'), to = +k.dataset.v;
+    P.setMx(k, prev, 7); P.countMx(k, to, 7);
+    P.pulse('kcal-card', 'glow');
+    const chk = document.querySelector(`.meal[data-i="${i}"] .check`); if (chk) P.pulse(chk, 'pop');
+    if (dl.eaten[i]) { P.floatText(k, `+${m.calories || 0} kcal`); if (navigator.vibrate) navigator.vibrate([10, 30, 10]); }
+    else P.floatText(k, `−${m.calories || 0} kcal`, 'var(--text2)');
     try { await rest(`daily_logs?id=eq.${log.id}`, { method: 'PATCH', body: JSON.stringify({ diet_log: dl }) }); }
     catch (e) { P.toast('Could not save — check internet', 'error'); }
   };
@@ -1016,22 +1032,22 @@
 
       <div class="grid2">
         <div class="w"><div class="w-head"><span class="wl"><b>03</b>Streak</span></div>
-          <div class="s-val acc">${P.matrix(streak, 5.6)}</div><div class="s-unit">days active</div>
-          <div class="pips acc">${P.pips(7, Math.min(7, streak))}</div></div>
+          <div class="s-val acc" id="pr-streak" data-v="0">${P.matrix(0, 5.6)}</div><div class="s-unit">days active</div>
+          <div class="pips acc sweep">${P.pips(7, Math.min(7, streak))}</div></div>
         <div class="w"><div class="w-head"><span class="wl"><b>04</b>Level ${lvl}</span></div>
-          <div class="s-val">${P.matrix(xp, 5.6)}</div><div class="s-unit">XP · ${500 - (xp % 500)} to next</div>
+          <div class="s-val" id="pr-xp" data-v="0">${P.matrix(0, 5.6)}</div><div class="s-unit">XP · ${500 - (xp % 500)} to next</div>
           <div class="seg" style="grid-template-columns:repeat(12,1fr);margin-top:14px">${Array.from({ length: 12 }, (_, i) => `<i class="${i < Math.round(frac * 12) ? 'on' : ''}"></i>`).join('')}</div></div>
       </div>
 
       <section class="w purple">
         <div class="w-head"><span class="wl"><b>05</b>Habit consistency</span><span class="wl" style="color:var(--purple)">${weekHab}% this week</span></div>
-        <div class="cols7">${habPct.map(v => col(v, 1)).join('')}</div><div class="cols-lbl">${lbls}</div>
+        <div class="cols7 sweep">${habPct.map(v => col(v, 1)).join('')}</div><div class="cols-lbl">${lbls}</div>
       </section>
 
       <div class="grid2">
         <div class="w tap" onclick="openSleep()"><div class="w-head"><span class="wl"><b>06</b>Sleep</span><span class="hint">+ LOG</span></div>
           <div class="s-val" style="color:var(--purple)">${P.matrix(avg(sleeps) ? avg(sleeps).toFixed(1) : '—', 5)}</div><div class="s-unit">avg hrs / 7 days</div>
-          <div class="cols7 purple" style="margin-top:12px">${sleeps.map(v => col(v, 9, 9)).join('')}</div></div>
+          <div class="cols7 purple sweep" style="margin-top:12px">${sleeps.map(v => col(v, 9, 9)).join('')}</div></div>
         <div class="w blue"><div class="w-head"><span class="wl"><b>07</b>Water</span></div>
           <div class="s-val blue">${P.matrix(avg(waters) ? avg(waters).toFixed(1) : '0', 5)}</div><div class="s-unit">avg glasses / day</div>
           <div class="cols7" style="margin-top:12px">${waters.map(v => col(v, 8, 8)).join('')}</div></div>
@@ -1040,12 +1056,15 @@
       <div class="grid2">
         <div class="w acc"><div class="w-head"><span class="wl"><b>08</b>Workouts</span></div>
           <div class="s-val acc">${P.matrix(`${workouts}/${planDays}`, 5)}</div><div class="s-unit">sessions this week</div>
-          <div class="pips acc" style="margin-top:14px">${P.pips(planDays, workouts)}</div></div>
+          <div class="pips acc sweep" style="margin-top:14px">${P.pips(planDays, workouts)}</div></div>
         <div class="w"><div class="w-head"><span class="wl"><b>09</b>BMI</span></div>
           <div class="s-val">${P.matrix(bmi ? bmi.toFixed(1) : '—', 5)}</div><div class="s-unit">${bmiCat || 'needs height'}</div>
           <div class="bmi-scale">${Array.from({ length: 40 }, (_, i) => `<i class="${i === bmiIdx ? 'me' : ''}" style="background:${bmiColor(i)};color:${bmiColor(i)}"></i>`).join('')}</div></div>
       </div>`;
     box.querySelectorAll(':scope > *').forEach((c, i) => c.style.setProperty('--i', i));
+    // columns: number each dot so they light bottom-up
+    box.querySelectorAll('.col').forEach((col, ci) => col.querySelectorAll('i').forEach((d, k) => d.style.setProperty('--k', k + ci * 2)));
+    setTimeout(() => { P.countMx('pr-streak', streak, 5.6); P.countMx('pr-xp', xp, 5.6); }, 250);
   }
 
   function weightChart(wl, target) {
@@ -1070,6 +1089,7 @@
     inp.blur();
     await saveLog({ weight: v });
     P.toast('Weight saved ✓', 'success'); renderProgress();
+    setTimeout(() => P.pulse(document.querySelector('#progress-content section:nth-child(2)'), 'glow'), 60);
   };
   window.openSleep = function () {
     const sh = P.openSheet(`<div class="sheet-title">Last night's sleep</div><div class="sheet-sub">How many hours did you sleep?</div>

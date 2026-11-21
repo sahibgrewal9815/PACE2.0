@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="pace-ui.css?v=4">
+<link rel="stylesheet" href="pace-ui.css?v=5">
 <style>
 .page{display:none;padding:calc(var(--safe-top) + 18px) 16px calc(var(--safe-bot) + 110px);}
 .page.active{display:block;}
@@ -212,13 +212,13 @@
 </nav>
 <input type="file" id="json-input" accept=".json,application/json" style="display:none">
 
-<script src="pace-ui.js?v=4"></script>
-<script src="plan-engine.js?v=4"></script>
+<script src="pace-ui.js?v=5"></script>
+<script src="plan-engine.js?v=5"></script>
 <script>
 (function () {
   const P = PACE, esc = P.esc, rest = P.rest, rpc = P.rpc, DS = P.DAYS_SHORT, MONTHS = P.MONTHS;
   P.startDots();
-  P.setMx('loader-logo', 'PACE', 9);
+  P.setMx('loader-logo', 'PACE', 9, { intro: true });
   const TOKEN = localStorage.getItem('pace2_trainer_token');
   if (!TOKEN) { location.replace('trainer-login.html'); return; }
   let T = null, REQS = [], ATHS = [], MSGS = [], TLOGS = [], reqFilter = 'pending', activeAth = null, THREAD = [], chatTimer = null, currentPage = 'overview';
@@ -246,7 +246,7 @@
   const unreadFor = id => MSGS.filter(m => m.athlete_id === id && m.sender === 'athlete' && !m.read_at && !m.deleted_at).length;
   function badges() {
     const pr = REQS.filter(isPending).length, um = MSGS.filter(m => m.sender === 'athlete' && !m.read_at && !m.deleted_at).length;
-    const set = (id, n) => { const b = document.getElementById(id); b.textContent = n > 9 ? '9+' : n; b.classList.toggle('show', n > 0); };
+    const set = (id, n) => { const b = document.getElementById(id); const t = n > 9 ? '9+' : String(n); if (b.textContent !== t && n > 0) P.pulse(b, 'pop'); b.textContent = t; b.classList.toggle('show', n > 0); };
     set('b-req', pr); set('b-msg', um);
   }
   const ago = iso => { const t = timeAgo(iso); return t === 'now' ? 'just now' : t + ' ago'; };
@@ -261,8 +261,10 @@
     const active = TLOGS.filter(l => (l.water_ml || 0) > 0 || Object.keys(l.habits || {}).length || Object.keys((l.diet_log || {}).eaten || {}).length).length;
     const stats = [['01', 'Athletes', ATHS.length, ''], ['02', 'Pending', REQS.filter(isPending).length, 'acc'], ['03', 'Active today', active, 'grn'],
       ['04', 'Unread', MSGS.filter(m => m.sender === 'athlete' && !m.read_at && !m.deleted_at).length, 'blu']];
-    document.getElementById('ov-stats').innerHTML = stats.map(([n, l, v, c]) =>
-      `<div class="w"><div class="w-head"><span class="wl"><b>${n}</b>${l}</span></div><div class="s-val ${c}">${P.matrix(v, 5.6)}</div></div>`).join('');
+    const box = document.getElementById('ov-stats');
+    if (!box.children.length) box.innerHTML = stats.map(([n, l, v, c]) =>
+      `<div class="w"><div class="w-head"><span class="wl"><b>${n}</b>${l}</span></div><div class="s-val ${c}" id="st-${n}" data-v="0">${P.matrix(0, 5.6)}</div></div>`).join('');
+    stats.forEach(([n, , v]) => { const el = document.getElementById('st-' + n); if (+el.dataset.v !== v || !el._done) { el._done = true; setTimeout(() => P.countMx(el, v, 5.6), 200); } });
     const pend = REQS.filter(isPending).slice(0, 3);
     document.getElementById('ov-req').innerHTML = pend.length ? pend.map(reqItem).join('') : P.empty('No pending requests');
     const seen = new Set(), latest = MSGS.filter(m => m.sender === 'athlete' && !seen.has(m.athlete_id) && seen.add(m.athlete_id)).slice(0, 4);
@@ -403,7 +405,34 @@
         <button class="btn ghost" onclick="resetDevice('${a.id}')" ${a.device_id ? '' : 'disabled'}>📱 Reset phone</button>
         <button class="btn ghost" onclick="resetPw('${a.id}')">🔑 Password</button>
       </div>
-      <div class="note">“Reset phone” logs the athlete out everywhere so they can sign in on a new phone. “New plan” rebuilds their 7-day workout and diet plan from their profile.</div>`);
+      <div class="note">“Reset phone” logs the athlete out everywhere so they can sign in on a new phone. “New plan” rebuilds their 7-day workout and diet plan from their profile.</div>
+      <button class="btn danger" style="margin-top:16px" onclick="deleteAthlete('${a.id}')">🗑 Delete athlete</button>`);
+  };
+
+  window.deleteAthlete = function (id) {
+    const a = ATHS.find(x => x.id === id); if (!a) return;
+    const first = a.name.split(' ')[0];
+    const sh = P.openSheet(`<div class="sheet-title" style="color:var(--red)">Delete ${esc(a.name)}?</div>
+      <div class="sheet-sub">This permanently removes their account, plans, habits, all daily logs and every chat message. It can't be undone. Their phone number becomes free to sign up again.</div>
+      <div class="field"><label class="label">Type <b style="color:var(--text)">${esc(first)}</b> to confirm</label>
+        <input class="input" id="del-confirm" autocomplete="off" autocapitalize="none" placeholder="${esc(first)}"></div>
+      <div class="acts"><button class="btn ghost" onclick="PACE.closeSheet()">Cancel</button>
+        <button class="btn danger" id="del-go" disabled>Delete forever</button></div>`);
+    const inp = sh.querySelector('#del-confirm'), go = sh.querySelector('#del-go');
+    inp.addEventListener('input', () => (go.disabled = inp.value.trim().toLowerCase() !== first.toLowerCase()));
+    go.onclick = async () => {
+      go.disabled = true; go.innerHTML = '<span class="spin"></span> Deleting…';
+      const r = await rpc('trainer_delete_athlete', { p_token: TOKEN, p_athlete: id }).catch(() => null);
+      if (r && r.ok) {
+        P.closeSheet();
+        ATHS = ATHS.filter(x => x.id !== id); MSGS = MSGS.filter(m => m.athlete_id !== id);
+        await loadReqs(); badges(); renderAths(); renderOverview();
+        P.toast(`${a.name} deleted`, 'success');
+      } else {
+        go.disabled = false; go.textContent = 'Delete forever';
+        P.toast(r && r.error === 'session' ? 'Session expired — log in again' : 'Could not delete', 'error');
+      }
+    };
   };
 
   window.resetDevice = async function (id) {
