@@ -2,1211 +2,355 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
 <title>PACE — Progress. Activity. Consistency. Energy.</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#060608">
+<meta name="apple-mobile-web-app-title" content="PACE">
+<meta name="theme-color" content="#070708">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
-<link rel="apple-touch-startup-image" href="icons/icon-512.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=3">
+<link rel="icon" type="image/png" href="icons/icon-96.png?v=3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="pace-ui.css?v=3">
 <style>
-  :root {
-    --bg: #060608;
-    --glass: rgba(255,255,255,0.04);
-    --glass2: rgba(255,255,255,0.07);
-    --glassbg: rgba(8,8,12,0.4);
-    --border: rgba(255,255,255,0.08);
-    --border2: rgba(255,255,255,0.12);
-    --acc: #FF5500;
-    --acc2: #FF8C00;
-    --text: #ffffff;
-    --text2: rgba(255,255,255,0.55);
-    --text3: rgba(255,255,255,0.28);
-    --green: #22c55e;
-    --radius: 20px;
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-  }
+.screen{display:none;min-height:var(--app-h,100vh);flex-direction:column;
+  padding:calc(var(--safe-top) + 18px) 20px calc(var(--safe-bot) + 22px);max-width:520px;margin:0 auto;}
+.screen.active{display:flex;animation:rise .45s cubic-bezier(.16,1,.3,1);}
+.center{align-items:center;justify-content:center;text-align:center;}
+.logo{color:var(--text);filter:drop-shadow(0 0 24px rgba(255,90,54,.25));}
+.tagline{font-family:var(--mono);font-size:10px;letter-spacing:3px;color:var(--text2);text-transform:uppercase;margin-top:20px;}
+.tagline b{color:var(--acc);font-weight:500;}
+.splash-actions{width:100%;margin-top:auto;padding-top:40px;}
+.or{display:flex;align-items:center;gap:12px;margin:14px 0;font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;}
+.or::before,.or::after{content:'';flex:1;height:1px;background:repeating-linear-gradient(90deg,var(--border2) 0 2px,transparent 2px 6px);}
+.links{display:flex;justify-content:center;gap:16px;margin-top:18px;font-family:var(--mono);font-size:10.5px;letter-spacing:1px;}
+.links a{color:var(--text3);text-decoration:none;}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-  html, body {
-    min-height: 100dvh;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', -apple-system, sans-serif;
-    overflow-x: hidden;
-  }
-
-  /* Rich background so glass has something to blur against */
-  body {
-    background:
-      radial-gradient(ellipse 80% 50% at 20% 20%, rgba(255,85,0,0.18) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 60% at 80% 80%, rgba(255,140,0,0.12) 0%, transparent 55%),
-      radial-gradient(ellipse 50% 40% at 50% 50%, rgba(120,40,0,0.15) 0%, transparent 65%),
-      #060608;
-  }
-
-  /* Ambient background blobs */
-  body::before {
-    content: '';
-    position: fixed;
-    top: 10%;
-    left: -20%;
-    width: 80vw;
-    height: 80vw;
-    background: radial-gradient(circle, rgba(255,85,0,0.22) 0%, rgba(180,40,0,0.1) 40%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-    animation: blobMove 8s ease-in-out infinite alternate;
-  }
-  body::after {
-    content: '';
-    position: fixed;
-    bottom: 5%;
-    right: -20%;
-    width: 70vw;
-    height: 70vw;
-    background: radial-gradient(circle, rgba(255,120,0,0.16) 0%, rgba(100,30,0,0.08) 40%, transparent 65%);
-    pointer-events: none;
-    z-index: 0;
-    animation: blobMove 10s ease-in-out infinite alternate-reverse;
-  }
-  @keyframes blobMove {
-    from { transform: translate(0, 0) scale(1); }
-    to   { transform: translate(5%, 5%) scale(1.08); }
-  }
-
-  /* ── SCREENS ── */
-  .screen {
-    display: none;
-    min-height: 100dvh;
-    padding-top: calc(var(--safe-top) + 20px);
-    padding-bottom: calc(var(--safe-bottom) + 32px);
-    padding-left: 22px;
-    padding-right: 22px;
-    animation: fadeUp 0.45s cubic-bezier(0.16,1,0.3,1);
-    position: relative;
-    z-index: 1;
-  }
-  .screen.active { display: flex; flex-direction: column; }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(28px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ── SPLASH ── */
-  #screen-splash {
-    align-items: center;
-    justify-content: center;
-  }
-  .splash-logo {
-    font-size: 86px;
-    font-weight: 900;
-    letter-spacing: -6px;
-    background: linear-gradient(135deg, #fff 0%, #FF8C00 50%, #FF5500 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 0 40px rgba(255,85,0,0.4));
-  }
-  .splash-tagline {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 4px;
-    color: var(--text3);
-    text-transform: uppercase;
-    margin-top: 10px;
-    text-align: center;
-  }
-  .splash-btn {
-    margin-top: 64px;
-    width: 100%;
-    max-width: 340px;
-  }
-
-  /* ── ONBOARDING HEADER ── */
-  .onb-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 28px;
-  }
-  .back-btn {
-    width: 42px; height: 42px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.06);
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
-    border: 0;
-    outline: 1px solid rgba(255,255,255,0.18);
-    outline-offset: -1px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    color: rgba(255,255,255,0.7);
-    font-size: 18px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(0,0,0,0.3);
-  }
-  .step-pill {
-    background: rgba(255,255,255,0.06);
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
-    border: 0;
-    outline: 1px solid rgba(255,255,255,0.18);
-    outline-offset: -1px;
-    border-radius: 20px;
-    padding: 7px 16px;
-    font-size: 12px;
-    font-weight: 700;
-    color: rgba(255,255,255,0.6);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 0 rgba(0,0,0,0.3);
-  }
-
-  /* Progress bar */
-  .progress-bar {
-    height: 2px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 10px;
-    margin-bottom: 36px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #FF5500, #FF8C00);
-    border-radius: 10px;
-    transition: width 0.5s cubic-bezier(0.16,1,0.3,1);
-    box-shadow: 0 0 10px rgba(255,85,0,0.6);
-  }
-
-  /* ── BIG QUESTION ── */
-  .question-label {
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--acc);
-    margin-bottom: 10px;
-    opacity: 0.9;
-  }
-  .question-title {
-    font-size: 32px;
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: -1px;
-    color: var(--text);
-    margin-bottom: 10px;
-  }
-  .question-sub {
-    font-size: 14px;
-    color: var(--text2);
-    margin-bottom: 28px;
-    line-height: 1.6;
-  }
-
-  /* ── OPTION CARDS ── */
-  .options-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    flex: 1;
-  }
-  .option-card {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 17px 18px;
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
-    border: 0;
-    outline: 1px solid rgba(255,255,255,0.14);
-    outline-offset: -1px;
-    border-radius: 18px;
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.16,1,0.3,1);
-    position: relative;
-    overflow: hidden;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.25);
-  }
-  .option-card.selected {
-    outline-color: rgba(255,85,0,0.5);
-    background: rgba(255,55,0,0.1);
-    box-shadow: inset 0 1px 0 rgba(255,120,0,0.3), inset 0 -1px 0 rgba(0,0,0,0.25), 0 0 20px rgba(255,85,0,0.1);
-  }
-  .option-emoji { font-size: 24px; flex-shrink: 0; }
-  .option-text {
-    flex: 1;
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--text);
-    line-height: 1.3;
-  }
-  .option-check {
-    width: 24px; height: 24px;
-    border-radius: 50%;
-    border: 1.5px solid rgba(255,255,255,0.2);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px;
-    transition: all 0.25s;
-    flex-shrink: 0;
-    background: rgba(255,255,255,0.05);
-  }
-  .option-card.selected .option-check {
-    background: linear-gradient(135deg, #FF5500, #FF8C00);
-    border-color: transparent;
-    color: white;
-    box-shadow: 0 0 12px rgba(255,85,0,0.5);
-  }
-
-  /* ── INPUTS ── */
-  .input-group { margin-bottom: 14px; }
-  .input-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 8px;
-    display: block;
-  }
-  .input-field {
-    width: 100%;
-    padding: 16px 18px;
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
-    border: 0;
-    outline: 1px solid rgba(255,255,255,0.14);
-    outline-offset: -1px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.2);
-    border-radius: 16px;
-    color: var(--text);
-    font-size: 16px;
-    font-family: 'Inter', sans-serif;
-    font-weight: 500;
-    outline: none;
-    transition: all 0.25s;
-    -webkit-appearance: none;
-  }
-  .input-field::placeholder { color: var(--text3); }
-  .input-field:focus {
-    border-color: rgba(255,85,0,0.4);
-    border-top-color: rgba(255,120,0,0.7);
-    background: rgba(10,6,6,0.4);
-  }
-  .input-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-
-  /* OTP inputs */
-  .otp-row {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin: 24px 0;
-  }
-  .otp-input {
-    width: 54px; height: 64px;
-    background: var(--glassbg);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    color: var(--text);
-    font-size: 26px;
-    font-weight: 700;
-    text-align: center;
-    outline: none;
-    font-family: 'Inter', sans-serif;
-    transition: all 0.2s;
-    -webkit-appearance: none;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
-  }
-  .otp-input:focus {
-    border-color: rgba(255,85,0,0.5);
-    box-shadow: 0 0 0 3px rgba(255,85,0,0.1);
-  }
-
-  /* ── BUTTONS ── */
-  .btn-primary {
-    width: 100%;
-    padding: 18px;
-    background: linear-gradient(135deg, #FF5500 0%, #FF8C00 100%);
-    border: none;
-    border-radius: 18px;
-    color: white;
-    font-size: 16px;
-    font-weight: 700;
-    font-family: 'Inter', sans-serif;
-    cursor: pointer;
-    transition: all 0.25s;
-    box-shadow: 0 8px 40px rgba(255,85,0,0.35), 0 2px 8px rgba(255,85,0,0.2);
-    letter-spacing: 0.2px;
-    position: relative;
-    overflow: hidden;
-  }
-  .btn-primary::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 1px;
-    background: rgba(255,255,255,0.25);
-    border-radius: 18px 18px 0 0;
-  }
-  .btn-primary:active { transform: scale(0.97); box-shadow: 0 4px 20px rgba(255,85,0,0.3); }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .btn-ghost {
-    width: 100%;
-    padding: 17px;
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
-    border: 0;
-    outline: 1px solid rgba(255,255,255,0.18);
-    outline-offset: -1px;
-    border-radius: 18px;
-    color: rgba(255,255,255,0.7);
-    font-size: 15px;
-    font-weight: 600;
-    font-family: 'Inter', sans-serif;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(0,0,0,0.3);
-  }
-  .btn-ghost:active { transform: scale(0.98); }
-
-  .btn-wrap {
-    margin-top: auto;
-    padding-top: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  /* ── GLOW CARD ── */
-  .glow-card {
-    background: var(--glassbg);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 4px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
-  }
-  .glow-card::after {
-    content: '';
-    position: absolute;
-    bottom: -40px; left: 50%;
-    transform: translateX(-50%);
-    width: 60%; height: 80px;
-    background: radial-gradient(ellipse, rgba(255,85,0,0.25), transparent 70%);
-    pointer-events: none;
-  }
-
-  /* ── PAYMENT SCREEN ── */
-  .qr-box {
-    background: white;
-    border-radius: 20px;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 20px 0;
-  }
-  .qr-box img { width: 100%; max-width: 220px; border-radius: 10px; }
-  .qr-placeholder {
-    width: 220px; height: 220px;
-    background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    flex-direction: column;
-    gap: 8px;
-    color: #999;
-    font-size: 13px;
-    font-weight: 500;
-  }
-
-  .amount-badge {
-    text-align: center;
-    margin: 12px 0 20px;
-  }
-  .amount-badge .amount {
-    font-size: 36px;
-    font-weight: 900;
-    background: linear-gradient(135deg, #FF5500, #FF8C00);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .amount-badge .label {
-    font-size: 12px;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-top: 2px;
-  }
-
-  .upload-box {
-    border: 1.5px dashed rgba(255,255,255,0.15);
-    border-radius: 18px;
-    padding: 28px 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.25s;
-    margin-bottom: 16px;
-    background: var(--glassbg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
-  }
-  .upload-box:hover, .upload-box.has-file {
-    border-color: rgba(255,85,0,0.5);
-    background: rgba(255,85,0,0.06);
-    box-shadow: 0 0 20px rgba(255,85,0,0.1), inset 0 1px 0 rgba(255,85,0,0.1);
-  }
-  .upload-icon { font-size: 32px; margin-bottom: 8px; }
-  .upload-text { font-size: 14px; color: var(--text2); }
-  .upload-text strong { color: var(--text); display: block; margin-bottom: 4px; }
-
-  /* ── SUCCESS SCREEN ── */
-  #screen-success {
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    background: radial-gradient(ellipse at 50% 40%, rgba(255,85,0,0.12) 0%, transparent 65%);
-  }
-  .success-icon {
-    width: 90px; height: 90px;
-    background: linear-gradient(135deg, rgba(255,85,0,0.2), rgba(255,140,0,0.1));
-    border: 1px solid rgba(255,85,0,0.3);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 40px;
-    margin: 0 auto 24px;
-    box-shadow: 0 0 60px rgba(255,85,0,0.2);
-  }
-  .success-title {
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    margin-bottom: 12px;
-  }
-  .success-sub {
-    font-size: 15px;
-    color: var(--text2);
-    line-height: 1.6;
-    max-width: 280px;
-    margin: 0 auto 32px;
-  }
-  .info-card {
-    background: var(--glassbg);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 16px 20px;
-    text-align: left;
-    width: 100%;
-    max-width: 320px;
-    margin: 0 auto;
-    box-shadow: 0 4px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
-  }
-  .info-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 14px;
-  }
-  .info-row:last-child { border-bottom: none; }
-  .info-row .key { color: var(--text2); }
-  .info-row .val { font-weight: 600; color: var(--text); }
-
-  /* ── LOGIN SCREEN ── */
-  #screen-login {
-    justify-content: center;
-  }
-  .login-logo {
-    font-size: 64px;
-    font-weight: 900;
-    letter-spacing: -4px;
-    background: linear-gradient(135deg, #fff 0%, #FF8C00 50%, #FF5500 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-align: center;
-    margin-bottom: 8px;
-    filter: drop-shadow(0 0 30px rgba(255,85,0,0.3));
-  }
-  .login-sub {
-    font-size: 11px;
-    color: var(--text3);
-    text-align: center;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-bottom: 44px;
-    font-weight: 600;
-  }
-
-
-  /* ── LOADING ── */
-  .loader {
-    display: inline-block;
-    width: 18px; height: 18px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    vertical-align: middle;
-    margin-right: 8px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* ── SCROLLABLE CONTENT ── */
-  .scroll-content {
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  .scroll-content::-webkit-scrollbar { display: none; }
-
-  /* Divider */
-  .divider {
-    display: flex; align-items: center; gap: 12px;
-    margin: 20px 0;
-    color: var(--text3);
-    font-size: 12px;
-  }
-  .divider::before, .divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  /* Note box */
-  .note-box {
-    background: rgba(255,85,0,0.05);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,85,0,0.15);
-    border-radius: 14px;
-    padding: 14px 16px;
-    font-size: 13px;
-    color: var(--text2);
-    line-height: 1.6;
-    margin-bottom: 16px;
-    box-shadow: inset 0 1px 0 rgba(255,85,0,0.1);
-  }
-  .note-box strong { color: var(--acc); }
-
-  /* ── TOAST ── */
-  .toast {
-    position: fixed;
-    top: calc(var(--safe-top) + 60px);
-    left: 50%; transform: translateX(-50%);
-    background: rgba(14,14,18,0.92);
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
-    border: 1px solid var(--border2);
-    border-radius: 14px;
-    padding: 13px 22px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-    z-index: 9999;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s;
-    white-space: nowrap;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
-  }
-  .toast.show { opacity: 1; }
-  .toast.error { border-color: rgba(239,68,68,0.5); color: #ef4444; }
-  .toast.success { border-color: rgba(34,197,94,0.5); color: var(--green); }
+.onb-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.back{width:40px;height:40px;border-radius:50%;background:var(--card2);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
+.step{font-family:var(--mono);font-size:10.5px;letter-spacing:1.4px;color:var(--text2);}
+.prog{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:26px;}
+.prog i{height:4px;border-radius:2px;background:rgba(255,255,255,.08);}
+.prog i.on{background:var(--acc);}
+.q-label{font-family:var(--mono);font-size:10.5px;letter-spacing:1.5px;color:var(--acc);text-transform:uppercase;margin-bottom:8px;}
+.q-title{font-size:27px;font-weight:800;letter-spacing:-.7px;line-height:1.1;margin-bottom:8px;}
+.q-sub{font-size:14px;color:var(--text2);line-height:1.5;margin-bottom:22px;}
+.btn-wrap{margin-top:auto;padding-top:22px;display:flex;flex-direction:column;gap:10px;}
+.opts{display:flex;flex-direction:column;gap:8px;}
+.opt{display:flex;align-items:center;gap:14px;padding:15px 16px;border-radius:var(--r-md);background:rgba(15,15,18,.92);border:1px solid var(--border);cursor:pointer;transition:all .18s;}
+.opt .n{font-family:var(--mono);font-size:10.5px;color:var(--text3);width:18px;}
+.opt .e{font-size:20px;}
+.opt .t{flex:1;font-size:14.5px;font-weight:600;}
+.opt .c{width:22px;height:22px;border-radius:50%;border:1.5px dashed var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;}
+.opt.on{border-color:var(--acc-line);background:var(--acc-dim);}
+.opt.on .c{background:var(--acc);border:1.5px solid var(--acc);color:#fff;}
+.note-box{padding:14px 16px;border-radius:var(--r-md);border:1px solid var(--border);background:rgba(255,255,255,.025);font-size:13px;color:var(--text2);line-height:1.55;margin-top:6px;}
+.note-box b{color:var(--text);}
+.upload{border:1.5px dashed var(--border2);border-radius:var(--r-lg);padding:26px 18px;text-align:center;cursor:pointer;margin:6px 0 12px;transition:all .2s;}
+.upload.has{border-color:var(--acc);background:var(--acc-dim);}
+.upload .ui{font-size:28px;margin-bottom:8px;}
+.upload b{display:block;font-size:14px;margin-bottom:4px;}
+.upload span{font-size:12px;color:var(--text2);}
+.amount{text-align:center;margin-bottom:14px;}
+.amount .a{color:var(--acc);display:flex;justify-content:center;margin-bottom:6px;}
+.qr{background:#fff;border-radius:18px;width:180px;height:180px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;color:#888;font-size:12px;flex-direction:column;gap:6px;}
+.ok-ic{width:84px;height:84px;border-radius:50%;margin:0 auto 22px;display:flex;align-items:center;justify-content:center;background:var(--acc-dim);border:1px solid var(--acc-line);}
+.ok-ic svg{width:38px;height:38px;stroke:var(--acc);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+.info{width:100%;text-align:left;margin-top:18px;}
+.info .r{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border);font-size:13.5px;}
+.info .r span:first-child{font-family:var(--mono);font-size:10.5px;letter-spacing:1px;color:var(--text2);text-transform:uppercase;}
+.login-logo{display:flex;justify-content:center;margin:auto 0 8px;color:var(--text);}
+.pw-hint{font-family:var(--mono);font-size:10.5px;color:var(--text3);line-height:1.6;margin:-4px 2px 18px;}
+.pw-hint b{color:var(--text2);font-weight:500;}
+.eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text2);font-family:var(--mono);font-size:10px;letter-spacing:1px;}
+.alert{display:none;padding:13px 15px;border-radius:14px;margin-bottom:16px;font-size:13px;line-height:1.5;}
+.alert.show{display:block;}
+.alert.err{background:rgba(255,90,90,.08);border:1px solid rgba(255,90,90,.3);color:#ffb3b3;}
+.alert.warn{background:var(--acc-dim);border:1px solid var(--acc-line);color:#ffc7b8;}
 </style>
 </head>
 <body>
-
+<canvas id="bg-dots"></canvas>
+<div class="bg-glow"></div>
 <div class="toast" id="toast"></div>
 
-<!-- ══════════════════════════════════════
-     SCREEN: SPLASH
-══════════════════════════════════════ -->
-<div class="screen active" id="screen-splash">
-  <div style="text-align:center;">
-    <div class="splash-logo">PACE</div>
-    <div class="splash-tagline">Progress · Activity · Consistency · Energy</div>
+<div class="scroll" id="app">
+
+<!-- SPLASH -->
+<div class="screen center active" id="screen-splash">
+  <div style="margin-top:auto">
+    <div class="logo" id="splash-logo"></div>
+    <div class="tagline"><b>P</b>rogress · <b>A</b>ctivity · <b>C</b>onsistency · <b>E</b>nergy</div>
   </div>
-  <div class="splash-btn">
-    <button class="btn-primary" onclick="goTo('screen-s1')">Get Started →</button>
-    <div class="divider">already have an account</div>
-    <button class="btn-ghost" onclick="goTo('screen-login')">Log In</button>
+  <div class="splash-actions">
+    <button class="btn acc" onclick="goTo('screen-s1')">Get started →</button>
+    <div class="or">already a member</div>
+    <button class="btn ghost" onclick="goTo('screen-login')">Log in</button>
+    <div class="links"><a href="trainer-login.html">COACH LOGIN</a></div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     SCREEN: S1 — Name & Contact
-══════════════════════════════════════ -->
+<!-- S1 -->
 <div class="screen" id="screen-s1">
-  <div class="onb-header">
-    <div class="back-btn" onclick="goTo('screen-splash')">←</div>
-    <div class="step-pill">1 of 7</div>
-    <div style="width:40px"></div>
+  <div class="onb-head"><div class="back" onclick="goTo('screen-splash')">←</div><div class="step">01 / 07</div><div style="width:40px"></div></div>
+  <div class="prog" data-n="1"></div>
+  <div class="q-label">Let's start</div>
+  <div class="q-title">What should we call you?</div>
+  <div class="q-sub">Your basic details to get you set up.</div>
+  <div class="field"><label class="label">Full name</label><input class="input" id="inp-name" placeholder="e.g. Arjun Singh" autocomplete="name"></div>
+  <div class="field"><label class="label">Phone number</label><input class="input" type="tel" inputmode="numeric" id="inp-phone" placeholder="98765 43210" autocomplete="tel"></div>
+  <div class="field"><label class="label">Email</label><input class="input" type="email" id="inp-email" placeholder="you@example.com" autocomplete="email"></div>
+  <div class="row2">
+    <div class="field"><label class="label">Date of birth</label><input class="input" type="date" id="inp-dob" max=""></div>
+    <div class="field"><label class="label">Gender</label>
+      <select class="input" id="inp-gender"><option value="" disabled selected>Select</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select></div>
   </div>
-  <div class="progress-bar"><div class="progress-fill" style="width:14%"></div></div>
-
-  <div class="question-label">Let's start</div>
-  <div class="question-title">What should we call you?</div>
-  <div class="question-sub">Your basic details to get you set up.</div>
-
-  <div class="scroll-content">
-    <div class="input-group">
-      <label class="input-label">Full Name</label>
-      <input class="input-field" type="text" id="inp-name" placeholder="e.g. Arjun Singh" autocomplete="name">
-    </div>
-    <div class="input-group">
-      <label class="input-label">Phone Number</label>
-      <input class="input-field" type="tel" id="inp-phone" placeholder="+91 98765 43210" autocomplete="tel">
-    </div>
-    <div class="input-group">
-      <label class="input-label">Email Address</label>
-      <input class="input-field" type="email" id="inp-email" placeholder="you@example.com" autocomplete="email">
-    </div>
-    <div class="input-row">
-      <div class="input-group">
-        <label class="input-label">Age</label>
-        <input class="input-field" type="number" id="inp-age" placeholder="25" min="13" max="80">
-      </div>
-      <div class="input-group">
-        <label class="input-label">Gender</label>
-        <select class="input-field" id="inp-gender">
-          <option value="" disabled selected>Select</option>
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <div class="btn-wrap">
-    <button class="btn-primary" onclick="validateS1()">Continue →</button>
-  </div>
+  <div class="btn-wrap"><button class="btn acc" id="s1-btn" onclick="validateS1()">Continue →</button></div>
 </div>
 
-<!-- ══════════════════════════════════════
-     SCREEN: S2 — Goal
-══════════════════════════════════════ -->
+<!-- S2 -->
 <div class="screen" id="screen-s2">
-  <div class="onb-header">
-    <div class="back-btn" onclick="goTo('screen-s1')">←</div>
-    <div class="step-pill">2 of 7</div>
-    <div style="width:40px"></div>
+  <div class="onb-head"><div class="back" onclick="goTo('screen-s1')">←</div><div class="step">02 / 07</div><div style="width:40px"></div></div>
+  <div class="prog" data-n="2"></div>
+  <div class="q-label">Your mission</div>
+  <div class="q-title">What's your main goal?</div>
+  <div class="q-sub">We'll build everything around this.</div>
+  <div class="opts" data-key="goal">
+    <div class="opt" data-v="weight_loss"><span class="n">01</span><span class="e">🔥</span><span class="t">Lose weight & burn fat</span><span class="c">✓</span></div>
+    <div class="opt" data-v="weight_gain"><span class="n">02</span><span class="e">💪</span><span class="t">Build muscle & gain weight</span><span class="c">✓</span></div>
+    <div class="opt" data-v="body_recomp"><span class="n">03</span><span class="e">⚡</span><span class="t">Body recomposition</span><span class="c">✓</span></div>
+    <div class="opt" data-v="discipline"><span class="n">04</span><span class="e">🧠</span><span class="t">Discipline & healthy habits</span><span class="c">✓</span></div>
+    <div class="opt" data-v="performance"><span class="n">05</span><span class="e">🏆</span><span class="t">Athletic performance</span><span class="c">✓</span></div>
   </div>
-  <div class="progress-bar"><div class="progress-fill" style="width:28%"></div></div>
-
-  <div class="question-label">Your Mission</div>
-  <div class="question-title">What's your main goal?</div>
-  <div class="question-sub">We'll build everything around this.</div>
-
-  <div class="options-list">
-    <div class="option-card" onclick="selectOption(this,'goal','weight_loss')">
-      <div class="option-emoji">🔥</div>
-      <div class="option-text">Lose Weight & Burn Fat</div>
-      <div class="option-check">✓</div>
-    </div>
-    <div class="option-card" onclick="selectOption(this,'goal','weight_gain')">
-      <div class="option-emoji">💪</div>
-      <div class="option-text">Build Muscle & Gain Weight</div>
-      <div class="option-check">✓</div>
-    </div>
-    <div class="option-card" onclick="selectOption(this,'goal','body_recomp')">
-      <div class="option-emoji">⚡</div>
-      <div class="option-text">Body Recomposition</div>
-      <div class="option-check">✓</div>
-    </div>
-    <div class="option-card" onclick="selectOption(this,'goal','discipline')">
-      <div class="option-emoji">🧠</div>
-      <div class="option-text">Build Discipline & Healthy Habits</div>
-      <div class="option-check">✓</div>
-    </div>
-    <div class="option-card" onclick="selectOption(this,'goal','performance')">
-      <div class="option-emoji">🏆</div>
-      <div class="option-text">Improve Athletic Performance</div>
-      <div class="option-check">✓</div>
-    </div>
-  </div>
-
-  <div class="btn-wrap">
-    <button class="btn-primary" onclick="validateOption('goal','screen-s3')">Continue →</button>
-  </div>
+  <div class="btn-wrap"><button class="btn acc" onclick="validateOption('goal','screen-s3')">Continue →</button></div>
 </div>
 
-<!-- ══════════════════════════════════════
-     SCREEN: S3 — Body Stats
-══════════════════════════════════════ -->
+<!-- S3 -->
 <div class="screen" id="screen-s3">
-  <div class="onb-header">
-    <div class="back-btn" onclick="goTo('screen-s2')">←</div>
-    <div class="step-pill">3 of 7</div>
-    <div style="width:40px"></div>
+  <div class="onb-head"><div class="back" onclick="goTo('screen-s2')">←</div><div class="step">03 / 07</div><div style="width:40px"></div></div>
+  <div class="prog" data-n="3"></div>
+  <div class="q-label">Your body</div>
+  <div class="q-title">Current stats & target</div>
+  <div class="q-sub">Be honest — this is how we build your plan.</div>
+  <div class="row2">
+    <div class="field"><label class="label">Weight now (kg)</label><input class="input" type="number" inputmode="decimal" id="inp-cw" placeholder="75" step="0.1"></div>
+    <div class="field"><label class="label">Target (kg)</label><input class="input" type="number" inputmode="decimal" id="inp-tw" placeholder="68" step="0.1"></div>
   </div>
-  <div class="progress-bar"><div class="progress-fill" style="width:42%"></div></div>
-
-  <div class="question-label">Your Body</div>
-  <div class="question-title">Current stats & target</div>
-  <div class="question-sub">Be honest — this is how we build your personal plan.</div>
-
-  <div class="scroll-content">
-    <div class="input-row">
-      <div class="input-group">
-        <label class="input-label">Current Weight (kg)</label>
-        <input class="input-field" type="number" id="inp-current-weight" placeholder="75" min="30" max="300" step="0.1">
-      </div>
-      <div class="input-group">
-        <label class="input-label">Target Weight (kg)</label>
-        <input class="input-field" type="number" id="inp-target-weight" placeholder="68" min="30" max="300" step="0.1">
-      </div>
-    </div>
-    <div class="input-group">
-      <label class="input-label">Height (cm)</label>
-      <input class="input-field" type="number" id="inp-height" placeholder="175" min="120" max="250">
-    </div>
-    <div class="input-group">
-      <label class="input-label">Goal Deadline 🎯</label>
-      <input class="input-field" type="date" id="inp-goal-date" style="color-scheme:dark">
-    </div>
-    <div class="note-box">
-      <strong>Why we ask this →</strong> Your trainer uses these numbers to calculate your exact calorie targets, macros, and workout intensity. The deadline sets how aggressive your plan will be.
-    </div>
-  </div>
-
-  <div class="btn-wrap">
-    <button class="btn-primary" onclick="validateS3()">Continue →</button>
-  </div>
+  <div class="field"><label class="label">Height (cm)</label><input class="input" type="number" inputmode="numeric" id="inp-ht" placeholder="175"></div>
+  <div class="field"><label class="label">Goal deadline</label><input class="input" type="date" id="inp-gd"></div>
+  <div class="note-box"><b>Why we ask →</b> Your coach uses these to set calorie targets, macros and workout intensity. The deadline sets how aggressive the plan is.</div>
+  <div class="btn-wrap"><button class="btn acc" onclick="validateS3()">Continue →</button></div>
 </div>
 
-<!-- ══════════════════════════════════════
-     SCREEN: S4 — Workout Preference
-══════════════════════════════════════ -->
+<!-- S4 -->
 <div class="screen" id="screen-s4">
-  <div class="onb-header">
-    <div class="back-btn" onclick="goTo('screen-s3')">←</div>
-    <div class="step-pill">4 of 7</div>
-    <div style="width:40px"></div>
+  <div class="onb-head"><div class="back" onclick="goTo('screen-s3')">←</div><div class="step">04 / 07</div><div style="width:40px"></div></div>
+  <div class="prog" data-n="4"></div>
+  <div class="q-label">Training style</div>
+  <div class="q-title">Where do you train?</div>
+  <div class="q-sub">Your plan is built around your setup.</div>
+  <div class="opts" data-key="workout_location">
+    <div class="opt" data-v="gym"><span class="n">01</span><span class="e">🏋️</span><span class="t">Gym — full equipment</span><span class="c">✓</span></div>
+    <div class="opt" data-v="home"><span class="n">02</span><span class="e">🏠</span><span class="t">Home — minimal equipment</span><span class="c">✓</span></div>
+    <div class="opt" data-v="both"><span class="n">03</span><span class="e">🔄</span><span class="t">Both — gym & home</span><span class="c">✓</span></div>
+    <div class="opt" data-v="outdoor"><span class="n">04</span><span class="e">🌳</span><span class="t">Outdoor — running, calisthenics</span><span class="c">✓</span></div>
   </div>
-  <div class="progress-bar"><div class="progress-fill" style="width:57%"></div></div>
-
-  <div class="question-label">Training Style</div>
-  <div class="question-title">Where do you prefer to train?</div>
-  <div class="question-sub">Your plan will be built around your setup.</div>
-
-  <div class="options-list">
-    <div class="option-card" onclick="selectOption(this,'workout_location','gym')">
-      <div class="option-emoji">🏋️</div>
-      <div class="option-text">Gym — Full equipment access</div>
-      <div class="option-check">✓</div>
-    </div>
-    <div class="option-card" onclick="selectOption(this,'workout_location','home')">
-      <div class="option-emoji">🏠</div>
-      <div class="option-text">Home — Minimal or no equipment</div>
-      <div class="option-check">✓</div>
-    </div>
-    <div class="option-card" onclick="selectOption(this,'workout_location','both')">
-      <div class="option-emoji">🔄</div>
-      <div class="option-text">Both — Mix of gym & home</div>
-      <div class="option-check">✓</div>
-    </div>
-    <div class="option-card" onclick="selectOption(this,'workout_location','outdoor')">
-      <div class="option-emoji">🌳</div>
-      <div class="option-text">Outdoor — Running, calisthenics</div>
-      <div class="option-check">✓</div>
-    </div>
-  </div>
-
-  <div class="btn-wrap">
-    <button class="btn-primary" onclick="validateOption('workout_location','screen-s5')">Continue →</button>
-  </div>
+  <div class="btn-wrap"><button class="btn acc" onclick="validateOption('workout_location','screen-s5')">Continue →</button></div>
 </div>
 
-<!-- ══════════════════════════════════════
-     SCREEN: S5 — Diet Preference
-══════════════════════════════════════ -->
+<!-- S5 -->
 <div class="screen" id="screen-s5">
-  <div class="onb-header">
-    <div class="back-btn" onclick="goTo('screen-s4')">←</div>
-    <div class="step-pill">5 of 7</div>
-    <div style="width:40px"></div>
+  <div class="onb-head"><div class="back" onclick="goTo('screen-s4')">←</div><div class="step">05 / 07</div><div style="width:40px"></div></div>
+  <div class="prog" data-n="5"></div>
+  <div class="q-label">Your diet</div>
+  <div class="q-title">What do you eat?</div>
+  <div class="q-sub">Your nutrition plan will match.</div>
+  <div class="opts" data-key="diet_preference">
+    <div class="opt" data-v="non_veg"><span class="n">01</span><span class="e">🍗</span><span class="t">Non-veg — chicken, eggs, fish</span><span class="c">✓</span></div>
+    <div class="opt" data-v="veg"><span class="n">02</span><span class="e">🥦</span><span class="t">Vegetarian — no meat or eggs</span><span class="c">✓</span></div>
+    <div class="opt" data-v="eggetarian"><span class="n">03</span><span class="e">🥚</span><span class="t">Eggetarian — veg + eggs</span><span class="c">✓</span></div>
+    <div class="opt" data-v="vegan"><span class="n">04</span><span class="e">🌱</span><span class="t">Vegan — plant-based only</span><span class="c">✓</span></div>
   </div>
-  <div class="progress-bar"><div class="progress-fill" style="width:71%"></div></div>
-
-  <div class="question-label">Your Diet</div>
-  <div class="question-title">What do you eat?</div>
-  <div class="question-sub">Your nutrition plan will match your preferences.</div>
-
-  <div class="options-list">
-    <div class="option-card" onclick="selectOption(this,'diet_preference','non_veg')">
-      <div class="option-emoji">🍗</div>
-      <div class="option-text">Non-Vegetarian — Chicken, eggs, fish</div>
-      <div class="option-check">✓</div>
-    </div>
-    <div class="option-card" onclick="selectOption(this,'diet_preference','veg')">
-      <div class="option-emoji">🥦</div>
-      <div class="option-text">Vegetarian — No meat or eggs</div>
-      <div class="option-check">✓</div>
-    </div>
-    <div class="option-card" onclick="selectOption(this,'diet_preference','eggetarian')">
-      <div class="option-emoji">🥚</div>
-      <div class="option-text">Eggetarian — Veg + eggs</div>
-      <div class="option-check">✓</div>
-    </div>
-    <div class="option-card" onclick="selectOption(this,'diet_preference','vegan')">
-      <div class="option-emoji">🌱</div>
-      <div class="option-text">Vegan — Plant-based only</div>
-      <div class="option-check">✓</div>
-    </div>
-  </div>
-
-  <div class="btn-wrap">
-    <button class="btn-primary" onclick="validateOption('diet_preference','screen-s6')">Continue →</button>
-  </div>
+  <div class="btn-wrap"><button class="btn acc" onclick="validateOption('diet_preference','screen-s6')">Continue →</button></div>
 </div>
 
-<!-- ══════════════════════════════════════
-     SCREEN: S6 — Body Photo (optional)
-══════════════════════════════════════ -->
+<!-- S6 -->
 <div class="screen" id="screen-s6">
-  <div class="onb-header">
-    <div class="back-btn" onclick="goTo('screen-s5')">←</div>
-    <div class="step-pill">6 of 7</div>
-    <div style="width:40px"></div>
-  </div>
-  <div class="progress-bar"><div class="progress-fill" style="width:85%"></div></div>
-
-  <div class="question-label">Optional</div>
-  <div class="question-title">Share your current physique</div>
-  <div class="question-sub">Your trainer will use this to understand your starting point. This is completely private.</div>
-
-  <div class="upload-box" id="photo-upload-box" onclick="document.getElementById('body-photo-input').click()">
-    <div class="upload-icon">📸</div>
-    <div class="upload-text">
-      <strong>Tap to upload a photo</strong>
-      Front or side pose works best
-    </div>
-  </div>
-  <input type="file" id="body-photo-input" accept="image/*" style="display:none" onchange="handleBodyPhoto(this)">
-
-  <div class="note-box">
-    <strong>🔒 Private & secure</strong> — Only your assigned trainer can see this. It's never shared publicly.
-  </div>
-
-  <div class="btn-wrap">
-    <button class="btn-primary" onclick="goTo('screen-s7')">Continue →</button>
-    <button class="btn-ghost" onclick="goTo('screen-s7')">Skip for now</button>
-  </div>
+  <div class="onb-head"><div class="back" onclick="goTo('screen-s5')">←</div><div class="step">06 / 07</div><div style="width:40px"></div></div>
+  <div class="prog" data-n="6"></div>
+  <div class="q-label">Optional</div>
+  <div class="q-title">Share your current physique</div>
+  <div class="q-sub">Helps your coach understand your starting point. Completely private.</div>
+  <div class="upload" id="photo-box" onclick="document.getElementById('body-photo').click()"><div class="ui">📸</div><b>Tap to upload a photo</b><span>Front or side pose works best</span></div>
+  <input type="file" id="body-photo" accept="image/*" style="display:none" onchange="pickFile(this,'photo-box','_bodyFile')">
+  <div class="note-box"><b>🔒 Private</b> — only your coach can see this.</div>
+  <div class="btn-wrap"><button class="btn acc" onclick="goTo('screen-s7')">Continue →</button><button class="btn ghost" onclick="goTo('screen-s7')">Skip for now</button></div>
 </div>
 
-<!-- ══════════════════════════════════════
-     SCREEN: S7 — Payment
-══════════════════════════════════════ -->
+<!-- S7 -->
 <div class="screen" id="screen-s7">
-  <div class="onb-header">
-    <div class="back-btn" onclick="goTo('screen-s6')">←</div>
-    <div class="step-pill">7 of 7</div>
-    <div style="width:40px"></div>
+  <div class="onb-head"><div class="back" onclick="goTo('screen-s6')">←</div><div class="step">07 / 07</div><div style="width:40px"></div></div>
+  <div class="prog" data-n="7"></div>
+  <div class="q-label">Last step</div>
+  <div class="q-title">Complete your enrolment</div>
+  <div class="amount"><div class="a" id="amount-dots"></div><div class="mono muted" style="font-size:10.5px;letter-spacing:1.5px">₹ / MONTHLY MEMBERSHIP</div></div>
+  <div class="w" style="text-align:center">
+    <div class="qr"><div style="font-size:34px">📱</div><div>Your QR code here</div></div>
+    <div style="font-size:13px;color:var(--text2)">UPI ID: <b style="color:var(--text)">yourname@upi</b></div>
   </div>
-  <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+  <div class="note-box"><b>How it works →</b> Pay, upload the screenshot, and your coach will activate your account within 24 hours. Your first password will be <b>Pace + your date of birth</b> (DDMMYYYY).</div>
+  <div class="upload" id="pay-box" onclick="document.getElementById('pay-photo').click()" style="margin-top:12px"><div class="ui">🧾</div><b>Upload payment screenshot</b><span>JPG or PNG of your UPI confirmation</span></div>
+  <input type="file" id="pay-photo" accept="image/*" style="display:none" onchange="pickFile(this,'pay-box','_paymentFile')">
+  <div class="btn-wrap"><button class="btn acc" id="submit-btn" onclick="submitSignup()">Submit application →</button></div>
+</div>
 
-  <div class="question-label">Last Step</div>
-  <div class="question-title">Complete your enrollment</div>
-
-  <div class="scroll-content">
-    <div class="amount-badge">
-      <div class="amount">₹999</div>
-      <div class="label">Monthly Membership</div>
-    </div>
-
-    <div class="glow-card" style="margin-bottom:16px; text-align:center;">
-      <div class="qr-box">
-        <div class="qr-placeholder">
-          <div style="font-size:40px">📱</div>
-          <div>Your QR Code here</div>
-          <div style="font-size:11px; color:#bbb">Add QR image in trainer settings</div>
-        </div>
-      </div>
-      <div style="font-size:13px; color:var(--text2); margin-top:8px;">UPI ID: <strong style="color:var(--text)">yourname@upi</strong></div>
-    </div>
-
-    <div class="note-box">
-      <strong>How it works →</strong> Pay the amount above, then upload your payment screenshot below. Your trainer will verify and send your login credentials within <strong>24 hours</strong>.
-    </div>
-
-    <div class="upload-box" id="payment-upload-box" onclick="document.getElementById('payment-input').click()">
-      <div class="upload-icon">🧾</div>
-      <div class="upload-text">
-        <strong>Upload payment screenshot</strong>
-        JPG or PNG of your UPI confirmation
-      </div>
-    </div>
-    <input type="file" id="payment-input" accept="image/*" style="display:none" onchange="handlePaymentPhoto(this)">
-  </div>
-
-  <div class="btn-wrap">
-    <button class="btn-primary" id="submit-btn" onclick="submitSignup()">Submit Application →</button>
+<!-- SUCCESS -->
+<div class="screen center" id="screen-success">
+  <div style="margin:auto 0;width:100%">
+    <div class="ok-ic"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
+    <div class="q-title">You're in the queue</div>
+    <div class="q-sub">Your coach is reviewing your profile and will activate your account within 24 hours.</div>
+    <div class="info" id="success-info"></div>
+    <button class="btn ghost" style="margin-top:24px" onclick="goTo('screen-login')">Go to log in</button>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     SCREEN: SUCCESS
-══════════════════════════════════════ -->
-<div class="screen" id="screen-success">
-  <div class="success-icon">⚡</div>
-  <div class="success-title">You're in the queue!</div>
-  <div class="success-sub">Your trainer is reviewing your profile. You'll receive your login credentials via email within 24 hours.</div>
-  <div class="info-card" id="success-info"></div>
-  <div style="margin-top:24px; font-size:13px; color:var(--text3); text-align:center; max-width:260px;">
-    Check your email inbox. Sometimes it goes to spam — add us to contacts!
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════
-     SCREEN: LOGIN
-══════════════════════════════════════ -->
+<!-- LOGIN -->
 <div class="screen" id="screen-login">
-  <div class="login-logo">PACE</div>
-  <div class="login-sub">Progress · Activity · Consistency · Energy</div>
-
-  <div class="input-group">
-    <label class="input-label">Phone Number</label>
-    <input class="input-field" type="tel" id="login-username" placeholder="98765 43210" autocomplete="tel">
-  </div>
-  <div class="input-group" style="margin-bottom:24px;">
-    <label class="input-label">Password</label>
-    <input class="input-field" type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
-  </div>
-
-  <button class="btn-primary" id="login-btn" onclick="doLogin()">Log In →</button>
-
-  <div class="divider" style="margin-top:24px;">new here</div>
-  <button class="btn-ghost" onclick="goTo('screen-s1')">Create Account</button>
+  <div class="onb-head"><div class="back" onclick="goTo('screen-splash')">←</div><div class="step">ATHLETE LOGIN</div><div style="width:40px"></div></div>
+  <div class="login-logo" id="login-logo"></div>
+  <div class="tagline" style="text-align:center;margin:14px 0 30px">Welcome back</div>
+  <div class="alert" id="login-alert"></div>
+  <div class="field"><label class="label">Phone number</label><input class="input" type="tel" inputmode="numeric" id="login-phone" placeholder="98765 43210" autocomplete="tel"></div>
+  <div class="field" style="position:relative"><label class="label">Password</label>
+    <div style="position:relative"><input class="input" type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" style="padding-right:64px">
+    <button class="eye" type="button" onclick="const i=document.getElementById('login-password');i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'SHOW':'HIDE'">SHOW</button></div></div>
+  <div class="pw-hint">First login? Your password is <b>Pace</b> + date of birth as <b>DDMMYYYY</b><br>e.g. born 21 Nov 2000 → <b>Pace21112000</b></div>
+  <button class="btn acc" id="login-btn" onclick="doLogin()">Log in →</button>
+  <div class="or" style="margin-bottom:auto">new here</div>
+  <button class="btn ghost" onclick="goTo('screen-s1')">Create account</button>
 </div>
 
+</div>
+
+<script src="pace-ui.js?v=3"></script>
 <script>
-(function(){
-  const SB_URL = 'https://blnqehdnorjvboxcqiap.supabase.co';
-  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsbnFlaGRub3JqdmJveGNxaWFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxNzEzNjUsImV4cCI6MjExMDc0NzM2NX0.gMJ1LuHZ9SpN6_2hsO6XJJXr67qFrOgyM-GRRfziXVs';
-  const H = { 'Content-Type':'application/json', 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` };
+(function () {
+  const P = PACE;
+  P.startDots();
 
-  // ── State ──
-  const D = {
-    name:'', phone:'', email:'', age:'', gender:'',
-    goal:'', current_weight:'', target_weight:'', height:'',
-    workout_location:'', diet_preference:'',
-    body_image_url: null, payment_screenshot_url: null
-  };
-  const selections = {};
+  // Already logged in?
+  try { const s = JSON.parse(localStorage.getItem('pace2_session') || 'null'); if (s && s.id) { location.replace('app.html'); return; } } catch (e) {}
 
-  // ── Navigation ──
-  window.goTo = function(id) {
+  P.setMx('splash-logo', 'PACE', Math.min(15, (Math.min(window.innerWidth, 520) - 60) / 23));
+  P.setMx('login-logo', 'PACE', 9);
+  P.setMx('amount-dots', '999', 7);
+  document.querySelectorAll('.prog').forEach(p => p.innerHTML = Array.from({ length: 7 }, (_, i) => `<i class="${i < +p.dataset.n ? 'on' : ''}"></i>`).join(''));
+  const today = P.localISO(new Date());
+  document.getElementById('inp-dob').max = today;
+  document.getElementById('inp-gd').min = today;
+
+  const D = {}; const sel = {};
+  window.goTo = id => {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
-    window.scrollTo(0,0);
+    document.getElementById('app').scrollTop = 0;
   };
+  document.querySelectorAll('.opts').forEach(g => g.querySelectorAll('.opt').forEach(o => o.onclick = () => {
+    g.querySelectorAll('.opt').forEach(x => x.classList.remove('on')); o.classList.add('on'); sel[g.dataset.key] = o.dataset.v;
+  }));
+  window.validateOption = (key, next) => { if (!sel[key]) { P.toast('Please select an option', 'error'); return; } D[key] = sel[key]; goTo(next); };
 
-  // ── Toast ──
-  function toast(msg, type='') {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'toast show ' + type;
-    setTimeout(() => t.className = 'toast', 2800);
-  }
+  const ageFrom = dob => { const b = new Date(dob), n = new Date(); let a = n.getFullYear() - b.getFullYear(); if (n < new Date(n.getFullYear(), b.getMonth(), b.getDate())) a--; return a; };
 
-  // ── Option selection ──
-  window.selectOption = function(el, key, val) {
-    el.closest('.options-list').querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
-    selections[key] = val;
-  };
-
-  window.validateOption = function(key, next) {
-    if (!selections[key]) { toast('Please select an option', 'error'); return; }
-    D[key] = selections[key];
-    goTo(next);
-  };
-
-  // ── Step 1 validation ──
-  window.validateS1 = function() {
-    const name = document.getElementById('inp-name').value.trim();
-    const phone = document.getElementById('inp-phone').value.trim();
-    const email = document.getElementById('inp-email').value.trim();
-    const age = document.getElementById('inp-age').value.trim();
-    const gender = document.getElementById('inp-gender').value;
-    if (!name) { toast('Please enter your name', 'error'); return; }
-    if (!phone || phone.length < 10) { toast('Enter a valid phone number', 'error'); return; }
-    if (!email || !email.includes('@')) { toast('Enter a valid email', 'error'); return; }
-    if (!age) { toast('Please enter your age', 'error'); return; }
-    if (!gender) { toast('Please select your gender', 'error'); return; }
-    Object.assign(D, { name, phone, email, age: parseInt(age), gender });
+  window.validateS1 = async function () {
+    const name = v('inp-name'), phone = v('inp-phone').replace(/\D/g, ''), email = v('inp-email'), dob = v('inp-dob'), gender = v('inp-gender');
+    if (!name) return P.toast('Please enter your name', 'error');
+    if (phone.length < 10) return P.toast('Enter a valid 10-digit phone number', 'error');
+    if (!email || !email.includes('@')) return P.toast('Enter a valid email', 'error');
+    if (!dob) return P.toast('Enter your date of birth', 'error');
+    const age = ageFrom(dob);
+    if (age < 12 || age > 90) return P.toast('Check your date of birth', 'error');
+    if (!gender) return P.toast('Please select your gender', 'error');
+    const btn = document.getElementById('s1-btn'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Checking…';
+    try {
+      const st = await P.rpc('phone_status', { p_phone: phone });
+      if (st === 'athlete_exists') { P.toast('This number already has an account — log in instead', 'error'); return; }
+      if (st === 'request_pending') { P.toast('An application with this number is already waiting for approval', 'error'); return; }
+    } catch (e) { P.toast('Check your internet and try again', 'error'); return; }
+    finally { btn.disabled = false; btn.innerHTML = 'Continue →'; }
+    Object.assign(D, { name, phone: phone.slice(-10), email, dob, age, gender });
     goTo('screen-s2');
   };
-
-  // ── Step 3 validation ──
-  window.validateS3 = function() {
-    const cw = document.getElementById('inp-current-weight').value;
-    const tw = document.getElementById('inp-target-weight').value;
-    const ht = document.getElementById('inp-height').value;
-    const gd = document.getElementById('inp-goal-date').value;
-    if (!cw) { toast('Enter your current weight', 'error'); return; }
-    if (!tw) { toast('Enter your target weight', 'error'); return; }
-    if (!ht) { toast('Enter your height', 'error'); return; }
-    if (!gd) { toast('Enter your goal deadline date', 'error'); return; }
-    if (new Date(gd) <= new Date()) { toast('Goal date must be in the future', 'error'); return; }
-    Object.assign(D, { current_weight: parseFloat(cw), target_weight: parseFloat(tw), height: parseFloat(ht), goal_date: gd });
+  window.validateS3 = function () {
+    const cw = +v('inp-cw'), tw = +v('inp-tw'), ht = +v('inp-ht'), gd = v('inp-gd');
+    if (!cw) return P.toast('Enter your current weight', 'error');
+    if (!tw) return P.toast('Enter your target weight', 'error');
+    if (!ht) return P.toast('Enter your height', 'error');
+    if (!gd) return P.toast('Pick a goal deadline', 'error');
+    if (new Date(gd) <= new Date()) return P.toast('Goal date must be in the future', 'error');
+    Object.assign(D, { current_weight: cw, target_weight: tw, height: ht, goal_date: gd });
     goTo('screen-s4');
   };
-
-  // ── File upload helpers ──
-  window.handleBodyPhoto = function(input) {
-    if (input.files[0]) {
-      D._bodyFile = input.files[0];
-      const box = document.getElementById('photo-upload-box');
-      box.classList.add('has-file');
-      box.querySelector('.upload-text strong').textContent = '✅ Photo selected!';
-      box.querySelector('.upload-text').lastChild.textContent = input.files[0].name;
-    }
+  window.pickFile = (input, box, key) => {
+    const f = input.files[0]; if (!f) return; D[key] = f;
+    const b = document.getElementById(box); b.classList.add('has');
+    b.querySelector('b').textContent = '✓ Selected'; b.querySelector('span').textContent = f.name;
   };
-
-  window.handlePaymentPhoto = function(input) {
-    if (input.files[0]) {
-      D._paymentFile = input.files[0];
-      const box = document.getElementById('payment-upload-box');
-      box.classList.add('has-file');
-      box.querySelector('.upload-text strong').textContent = '✅ Screenshot selected!';
-      box.querySelector('.upload-text').lastChild.textContent = input.files[0].name;
-    }
-  };
-
-  // ── Upload file to Supabase storage ──
-  async function uploadFile(file, bucket, path) {
-    const res = await fetch(`${SB_URL}/storage/v1/object/${bucket}/${path}`, {
-      method: 'POST',
-      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': file.type },
-      body: file
-    });
-    if (!res.ok) return null;
-    return `${SB_URL}/storage/v1/object/public/${bucket}/${path}`;
+  async function upload(file, bucket, path) {
+    const r = await fetch(`${P.SB_URL}/storage/v1/object/${bucket}/${path}`, { method: 'POST',
+      headers: { apikey: P.SB_KEY, Authorization: `Bearer ${P.SB_KEY}`, 'Content-Type': file.type }, body: file });
+    return r.ok ? `${P.SB_URL}/storage/v1/object/public/${bucket}/${path}` : null;
   }
-
-  // ── Final submit ──
-  window.submitSignup = function() {
-    if (!D._paymentFile) { toast('Please upload payment screenshot', 'error'); return; }
-    const btn = document.getElementById('submit-btn');
-    btn.innerHTML = '<span class="loader"></span> Submitting...';
-    btn.disabled = true;
-    doSubmit(btn);
-  };
-
-  async function doSubmit(btn) {
+  window.submitSignup = async function () {
+    if (!D._paymentFile) return P.toast('Please upload the payment screenshot', 'error');
+    const btn = document.getElementById('submit-btn'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Submitting…';
     try {
-      // Upload payment screenshot
       const ts = Date.now();
-      const paymentUrl = await uploadFile(D._paymentFile, 'payments', `${ts}_${D.phone}.jpg`);
-
-      // Upload body photo if exists
-      let bodyUrl = null;
-      if (D._bodyFile) {
-        bodyUrl = await uploadFile(D._bodyFile, 'body-photos', `${ts}_${D.phone}.jpg`);
-      }
-
-      // Submit signup request
-      const payload = {
-        name: D.name, phone: D.phone, email: D.email,
-        goal: D.goal, current_weight: D.current_weight,
-        target_weight: D.target_weight, height: D.height,
-        age: D.age, gender: D.gender,
-        workout_location: D.workout_location,
-        diet_preference: D.diet_preference,
-        goal_date: D.goal_date,
-        payment_screenshot_url: paymentUrl || 'uploaded',
-        body_image_url: bodyUrl,
-        status: 'payment_submitted'
-      };
-
-      const res = await fetch(`${SB_URL}/rest/v1/signup_requests`, {
-        method: 'POST',
-        headers: { ...H, 'Prefer': 'return=minimal' },
-        body: JSON.stringify(payload)
-      });
-
-      if (!res.ok) throw new Error('Submit failed');
-
-      // Show success
-      document.getElementById('success-info').innerHTML = `
-        <div class="info-row"><span class="key">Name</span><span class="val">${D.name}</span></div>
-        <div class="info-row"><span class="key">Email</span><span class="val">${D.email}</span></div>
-        <div class="info-row"><span class="key">Goal</span><span class="val">${D.goal.replace('_',' ')}</span></div>
-        <div class="info-row"><span class="key">Status</span><span class="val" style="color:var(--acc)">⏳ Under Review</span></div>
-      `;
+      const pay = await upload(D._paymentFile, 'payments', `${ts}_${D.phone}.jpg`);
+      const body = D._bodyFile ? await upload(D._bodyFile, 'body-photos', `${ts}_${D.phone}.jpg`) : null;
+      await P.rest('signup_requests', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({
+        name: D.name, phone: D.phone, email: D.email, dob: D.dob, age: D.age, gender: D.gender,
+        goal: D.goal, current_weight: D.current_weight, target_weight: D.target_weight, height: D.height, goal_date: D.goal_date,
+        workout_location: D.workout_location, diet_preference: D.diet_preference,
+        payment_screenshot_url: pay || 'uploaded', body_image_url: body, status: 'payment_submitted' }) });
+      document.getElementById('success-info').innerHTML = [['Name', D.name], ['Phone', D.phone], ['Goal', D.goal.replace('_', ' ')], ['Status', '<span style="color:var(--acc)">Under review</span>']]
+        .map(([k, x]) => `<div class="r"><span>${k}</span><span>${k === 'Status' ? x : P.esc(x)}</span></div>`).join('');
       goTo('screen-success');
-
-    } catch(e) {
-      toast('Something went wrong. Try again.', 'error');
-      btn.innerHTML = 'Submit Application →';
-      btn.disabled = false;
-    }
-  }
+    } catch (e) {
+      const m = String(e.message || '');
+      P.toast(m.includes('PHONE_EXISTS') ? 'This number already has an account' : (m.includes('23505') || m.includes('duplicate')) ? 'An application with this number is already pending' : 'Something went wrong. Try again.', 'error');
+    } finally { btn.disabled = false; btn.innerHTML = 'Submit application →'; }
+  };
 
   // ── Login ──
-  window.doLogin = async function() {
-    const username = document.getElementById('login-username').value.trim().replace(/\s+/g,'');
-    const password = document.getElementById('login-password').value.trim();
-    if (!username || !password) { toast('Enter phone and password', 'error'); return; }
-
-    const btn = document.getElementById('login-btn');
-    btn.innerHTML = '<span class="loader"></span> Logging in...';
-    btn.disabled = true;
-
+  const alertBox = (type, html) => { const a = document.getElementById('login-alert'); a.className = 'alert show ' + type; a.innerHTML = html; };
+  window.doLogin = async function () {
+    const phone = v('login-phone').replace(/\D/g, ''), pw = document.getElementById('login-password').value;
+    if (phone.length < 10 || !pw) return P.toast('Enter phone and password', 'error');
+    const btn = document.getElementById('login-btn'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Logging in…';
     try {
-      const res = await fetch(`${SB_URL}/rest/v1/athletes?phone=eq.${encodeURIComponent(username)}&password=eq.${encodeURIComponent(password)}&status=eq.active`, {
-        headers: H
-      });
-      const data = await res.json();
-      if (data && data.length > 0) {
-        localStorage.setItem('pace2_session', JSON.stringify(data[0]));
-        window.location.href = 'app.html';
-      } else {
-        toast('Invalid credentials or account not yet activated', 'error');
-        btn.innerHTML = 'Log In →';
-        btn.disabled = false;
-      }
-    } catch(e) {
-      toast('Login failed. Check connection.', 'error');
-      btn.innerHTML = 'Log In →';
-      btn.disabled = false;
-    }
+      const r = await P.rpc('athlete_login', { p_phone: phone, p_password: pw, p_device: P.deviceId() });
+      if (r && r.athlete) { localStorage.setItem('pace2_session', JSON.stringify(r.athlete)); location.replace('app.html'); return; }
+      const err = r && r.error;
+      if (err === 'device_locked') alertBox('warn', '<b>Already logged in on another phone.</b><br>Your account works on one phone at a time. Log out on the other phone (Profile → Log out), or ask your coach to reset your phone.');
+      else if (err === 'inactive') alertBox('warn', 'Your account isn\'t active yet. Your coach will activate it after checking your payment.');
+      else if (err === 'locked') alertBox('err', 'Too many wrong tries. Please wait 15 minutes and try again.');
+      else alertBox('err', 'Wrong phone number or password.');
+    } catch (e) { alertBox('err', 'Couldn\'t reach the server. Check your internet.'); }
+    btn.disabled = false; btn.innerHTML = 'Log in →';
   };
+  document.getElementById('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
-  // ── Check existing session ──
-  const sess = localStorage.getItem('pace2_session');
-  if (sess) {
-    try {
-      const s = JSON.parse(sess);
-      if (s && s.id) window.location.href = 'app.html';
-    } catch(e) {}
-  }
+  const reason = new URLSearchParams(location.search).get('reason');
+  if (reason === 'device') { goTo('screen-login'); alertBox('warn', 'You were logged out because your account was opened on another phone, or your coach reset your phone. Log in again to continue.'); }
+  else if (location.hash === '#login') goTo('screen-login');
 
+  function v(id) { return document.getElementById(id).value.trim(); }
 })();
 </script>
 </body>
