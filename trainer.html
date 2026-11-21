@@ -857,7 +857,7 @@ body::after {
   async function loadRequests() {
     const r = await fetch(`${SB_URL}/rest/v1/signup_requests?order=created_at.desc`, { headers: H });
     allRequests = await r.json() || [];
-    const pending = allRequests.filter(r => r.status === 'pending').length;
+    const pending = allRequests.filter(r => r.status === 'pending' || r.status === 'payment_submitted').length;
     const badge = document.getElementById('requests-badge');
     if (pending > 0) { badge.textContent = pending; badge.style.display = 'inline'; }
     document.getElementById('stat-pending').textContent = pending;
@@ -914,14 +914,16 @@ body::after {
   }
 
   function requestCardHTML(req, compact=false) {
-    const statusClass = req.status;
+    const isPending = req.status === 'pending' || req.status === 'payment_submitted';
+    const statusClass = isPending ? 'pending' : req.status;
+    const statusLabel = req.status === 'payment_submitted' ? '💳 PAYMENT SENT' : req.status.toUpperCase();
     return `<div class="request-card glass" id="req-${req.id}">
       <div class="request-header">
         <div>
           <div class="request-name">${req.name}</div>
           <div class="request-time">${timeAgo(req.created_at)}</div>
         </div>
-        <div class="status-pill ${statusClass}">${req.status.toUpperCase()}</div>
+        <div class="status-pill ${statusClass}">${statusLabel}</div>
       </div>
       ${!compact ? `<div class="request-info">
         <div class="info-row"><div class="info-label">Phone</div><div class="info-val">${req.phone||'—'}</div></div>
@@ -931,7 +933,7 @@ body::after {
       </div>` : ''}
       <div class="request-actions">
         <button class="btn btn-view" onclick="openRequest('${req.id}')">👁 View</button>
-        ${req.status==='pending' ? `
+        ${isPending ? `
           <button class="btn btn-approve" onclick="approveRequest('${req.id}')">✓ Approve</button>
           <button class="btn btn-reject" onclick="rejectRequest('${req.id}')">✗ Reject</button>
         ` : ''}
@@ -950,7 +952,8 @@ body::after {
   function renderRequests() {
     const list = document.getElementById('requests-list');
     let filtered = allRequests;
-    if (currentFilter !== 'all') filtered = allRequests.filter(r=>r.status===currentFilter);
+    if (currentFilter === 'pending') filtered = allRequests.filter(r => r.status === 'pending' || r.status === 'payment_submitted');
+    else if (currentFilter !== 'all') filtered = allRequests.filter(r=>r.status===currentFilter);
     if (!filtered.length) {
       list.innerHTML = `<div class="empty-state"><div class="icon">📭</div><div class="title">No ${currentFilter} requests</div></div>`;
       return;
@@ -977,7 +980,8 @@ body::after {
       ${req.payment_screenshot_url ? `<div class="info-label" style="margin-bottom:6px;">Payment Screenshot</div><img class="payment-img" src="${req.payment_screenshot_url}" onerror="this.style.display='none'">` : '<div style="color:var(--text3); font-size:13px; margin-bottom:12px;">No payment screenshot uploaded</div>'}
       ${req.body_photo_url ? `<div class="info-label" style="margin-bottom:6px;">Body Photo</div><img class="payment-img" src="${req.body_photo_url}" onerror="this.style.display='none'">` : ''}
     `;
-    document.getElementById('req-modal-actions').innerHTML = req.status==='pending'
+    const _isPending = req.status === 'pending' || req.status === 'payment_submitted';
+    document.getElementById('req-modal-actions').innerHTML = _isPending
       ? `<button class="btn btn-approve" onclick="approveRequest('${req.id}');closeModal('modal-request')">✓ Approve & Create Account</button>
          <button class="btn btn-reject" onclick="rejectRequest('${req.id}');closeModal('modal-request')">✗ Reject</button>`
       : `<div style="color:var(--text3); font-size:13px;">Status: <strong>${req.status}</strong></div>`;
