@@ -95,9 +95,9 @@
   // ── Real screen height (iOS home-screen apps can under-report it to CSS) ──
   const root = document.documentElement;
   function fit() {
-    let h = Math.max(window.innerHeight, document.documentElement.clientHeight);
-    const portrait = window.innerWidth < window.innerHeight;
-    if (P.isStandalone() && portrait && /iPhone|iPod/.test(navigator.userAgent) && screen.height > h && screen.height - h <= 60) h = screen.height;
+    // Use exactly the area the phone shows. (Forcing screen.height pushed the bar into
+    // the strip some iPhones don't let web apps draw into, cutting it off.)
+    const h = window.innerHeight;
     if (P.keyboardOpen) return;          // don't shrink the layout while the keyboard is up
     root.style.setProperty('--app-h', h + 'px');
   }
@@ -105,6 +105,28 @@
   fit();
   ['resize', 'orientationchange', 'pageshow'].forEach(e => window.addEventListener(e, () => { fit(); setTimeout(fit, 300); }));
   [50, 300, 1000, 2500].forEach(t => setTimeout(fit, t));
+
+  // ── Hidden diagnostics: tap the page title 5× quickly ──
+  let dTaps = 0, dT;
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.greeting, .title, .sub, #ov-date')) return;
+    dTaps++; clearTimeout(dT); dT = setTimeout(() => (dTaps = 0), 1500);
+    if (dTaps < 5) return; dTaps = 0;
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;left:0;width:1px;height:env(safe-area-inset-bottom);padding-top:env(safe-area-inset-top);visibility:hidden';
+    document.body.appendChild(probe); const cs = getComputedStyle(probe);
+    const dock = document.querySelector('.dock'), r = dock ? dock.getBoundingClientRect() : null;
+    const vv = window.visualViewport;
+    const info = { mode: P.isStandalone() ? 'HOME-SCREEN APP' : 'BROWSER', screen: screen.width + 'x' + screen.height, innerHeight: window.innerHeight,
+      clientHeight: document.documentElement.clientHeight, visualVP: vv ? Math.round(vv.height) + ' @' + Math.round(vv.offsetTop) : '-',
+      safeTop: cs.paddingTop, safeBottom: cs.height, dock: r ? Math.round(r.top) + '→' + Math.round(r.bottom) : '-',
+      ios: (navigator.userAgent.match(/OS (\d+[_\d]*)/) || [])[1] || '-' };
+    probe.remove();
+    const box = document.createElement('div');
+    box.style.cssText = 'position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top) + 60px);z-index:99999;background:#000;border:1px solid #FF5A36;border-radius:14px;padding:14px;font:12px/1.7 ui-monospace,Menlo,monospace;color:#fff;white-space:pre-wrap';
+    box.textContent = 'PACE DEBUG — screenshot & send\n\n' + Object.entries(info).map(([k, v]) => k + ': ' + v).join('\n') + '\n\n(tap to close)';
+    box.onclick = () => box.remove(); document.body.appendChild(box);
+  });
 
   // ── Animated dot background (pauses while touching / scrolling) ──
   P.startDots = function () {
