@@ -171,6 +171,16 @@ button,input{font-family:inherit;}
 .pips.acc i.on{background:var(--acc);box-shadow:0 0 8px rgba(255,90,54,.45);}
 .pips.tap i{width:12px;height:12px;cursor:pointer;}
 .pips.tap{gap:5px;flex-wrap:nowrap;}
+.water-w{cursor:pointer;touch-action:pan-y;user-select:none;-webkit-user-select:none;}
+.water-w:active{border-color:rgba(77,163,255,.3);}
+.water-w.arming{border-color:rgba(255,90,90,.45);}
+.w-hint{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--blue);opacity:.7;}
+.swipe-hint{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--text3);margin-top:8px;}
+.water-w.arming .swipe-hint{color:var(--red);}
+.w-pop{position:absolute;top:44px;right:16px;font-family:var(--dot);font-weight:900;font-size:26px;opacity:0;pointer-events:none;}
+.w-pop.show{animation:popUp .6s ease-out;}
+.w-pop.plus{color:var(--blue);} .w-pop.minus{color:var(--red);}
+@keyframes popUp{0%{opacity:0;transform:translateY(8px) scale(.8)}25%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-14px)}}
 .s-foot{font-family:var(--mono);font-size:10.5px;margin-top:14px;color:var(--text3);}
 .s-foot.down{color:var(--green);} .s-foot.up{color:var(--red);}
 
@@ -416,11 +426,13 @@ button,input{font-family:inherit;}
   </section>
 
   <div class="stat-grid">
-    <div class="w">
-      <div class="w-head"><span class="wl"><b>03</b>Water</span></div>
+    <div class="w water-w" id="water-tile">
+      <div class="w-head"><span class="wl"><b>03</b>Water</span><span class="w-hint">TAP +</span></div>
       <div class="s-val" id="home-water-val">0</div>
       <div class="s-unit">of 8 glasses</div>
-      <div class="pips blue tap" id="water-pips"></div>
+      <div class="pips blue" id="water-pips"></div>
+      <div class="swipe-hint">‹ swipe −</div>
+      <div class="w-pop" id="water-pop"></div>
     </div>
     <div class="w">
       <div class="w-head"><span class="wl"><b>04</b>Streak</span></div>
@@ -782,16 +794,57 @@ button,input{font-family:inherit;}
   function renderWater() {
     const glasses = TODAY_LOG ? Math.round((TODAY_LOG.water_ml || 0) / 250) : 0;
     document.getElementById('home-water-val').textContent = glasses;
-    document.getElementById('water-pips').innerHTML = pips(8, glasses, 'onclick="setWater($i)"');
+    document.getElementById('water-pips').innerHTML = pips(8, Math.min(8, glasses));
   }
 
-  window.setWater = async function(i) {
+  // Tap the water tile = +1 glass, swipe it sideways = −1 glass
+  function changeWater(delta) {
     const cur = Math.round((TODAY_LOG?.water_ml || 0) / 250);
-    const n = (cur === i + 1) ? i : i + 1;   // tap the last lit dot again to undo
-    await saveLog({ water_ml: n * 250 });
+    const n = Math.max(0, Math.min(20, cur + delta));
+    if (n === cur) { if (delta < 0) toast('Already at 0', 'error'); return; }
+    if (TODAY_LOG) TODAY_LOG.water_ml = n * 250;   // update instantly, save in background
     renderWater();
+    const pop = document.getElementById('water-pop');
+    pop.textContent = delta > 0 ? '+1' : '−1';
+    pop.className = 'w-pop show ' + (delta > 0 ? 'plus' : 'minus');
+    clearTimeout(pop._t); pop._t = setTimeout(() => pop.className = 'w-pop', 600);
+    if (navigator.vibrate) navigator.vibrate(delta > 0 ? 10 : [8, 40, 8]);
     if (n === 8 && cur < 8) toast('Hydration goal hit 💧', 'success');
-  };
+    saveLog({ water_ml: n * 250 }).catch(() => toast('Could not save water', 'error'));
+  }
+
+  (function waterGestures() {
+    const tile = document.getElementById('water-tile');
+    let x0 = 0, y0 = 0, dx = 0, tracking = false, swiping = false;
+    tile.addEventListener('pointerdown', e => {
+      x0 = e.clientX; y0 = e.clientY; dx = 0; tracking = true; swiping = false;
+      tile.style.transition = 'none';
+    });
+    tile.addEventListener('pointermove', e => {
+      if (!tracking) return;
+      dx = e.clientX - x0;
+      const dy = e.clientY - y0;
+      if (!swiping && Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)) { tracking = false; tile.style.transform = ''; return; } // user is scrolling
+      if (Math.abs(dx) > 8) swiping = true;
+      if (swiping) {
+        const pull = Math.max(-60, Math.min(60, dx * 0.5));
+        tile.style.transform = `translateX(${pull}px)`;
+        tile.classList.toggle('arming', Math.abs(dx) > 50);
+      }
+    });
+    const end = () => {
+      if (!tracking) return;
+      tracking = false;
+      tile.style.transition = 'transform .35s cubic-bezier(.16,1,.3,1)';
+      tile.style.transform = '';
+      tile.classList.remove('arming');
+      if (swiping) { if (Math.abs(dx) > 50) changeWater(-1); }
+      else changeWater(1);
+    };
+    tile.addEventListener('pointerup', end);
+    tile.addEventListener('pointercancel', () => { tracking = false; tile.style.transform = ''; tile.classList.remove('arming'); });
+    tile.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') end(); });
+  })();
 
   function renderWeightTile() {
     const w = TODAY_LOG?.weight;
