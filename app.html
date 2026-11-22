@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="pace-ui.css?v=5">
+<link rel="stylesheet" href="pace-ui.css?v=6">
 <style>
 /* ── pages ── */
 .page{display:none;padding:calc(var(--safe-top) + 18px) 16px calc(var(--safe-bot) + 110px);}
@@ -273,6 +273,48 @@
 .act-react span.on{background:var(--acc-dim);}
 .act-list .btn{justify-content:flex-start;margin-bottom:8px;font-weight:600;}
 
+/* kitchen */
+.icon-btn{width:44px;height:44px;border-radius:14px;flex-shrink:0;background:var(--card2);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;position:relative;color:var(--text);}
+.icon-btn svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+.icon-btn:active{transform:scale(.95);}
+.icon-btn .badge{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--acc);color:#fff;
+  font-family:var(--mono);font-size:10px;display:none;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(255,90,54,.6);}
+.icon-btn .badge.show{display:flex;}
+.tb-left{display:flex;align-items:center;gap:12px;}
+.k-row{display:flex;align-items:center;gap:12px;padding:12px 12px 12px 14px;margin-bottom:8px;background:rgba(15,15,18,.92);border:1px solid var(--border);border-radius:var(--r-md);}
+.k-row.low{border-color:var(--acc-line);}
+.k-row.empty-q{opacity:.55;}
+.k-emo{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+.k-body{flex:1;min-width:0;cursor:pointer;}
+.k-name{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.k-sub{font-family:var(--mono);font-size:10.5px;color:var(--text2);margin-top:3px;display:flex;align-items:center;gap:8px;}
+.k-sub .lowtag{color:var(--acc);}
+.k-fill{display:grid;grid-template-columns:repeat(10,1fr);gap:2px;margin-top:7px;max-width:120px;}
+.k-fill i{height:4px;border-radius:2px;background:rgba(255,255,255,.08);}
+.k-fill i.on{background:var(--green);} .k-row.low .k-fill i.on{background:var(--acc);}
+.k-qty{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.k-qty .q{font-family:var(--mono);font-size:13px;font-weight:600;min-width:62px;text-align:center;}
+.k-qty button{width:32px;height:32px;border-radius:10px;background:var(--card2);border:1px solid var(--border2);font-size:17px;font-weight:700;color:var(--text);}
+.k-qty button:active{border-color:var(--acc-line);}
+.n-row{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:8px;background:rgba(15,15,18,.92);border:1px solid var(--border);border-radius:var(--r-md);}
+.n-row .st{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;}
+.n-row.ok .st{background:rgba(61,220,132,.12);color:var(--green);border:1px solid rgba(61,220,132,.3);}
+.n-row.short .st{background:rgba(255,214,10,.1);color:var(--yellow);border:1px solid rgba(255,214,10,.3);}
+.n-row.missing .st{background:rgba(255,90,90,.1);color:var(--red);border:1px solid rgba(255,90,90,.3);}
+.n-row .nm{flex:1;min-width:0;}
+.n-row .nm b{display:block;font-size:14.5px;font-weight:600;}
+.n-row .nm span{font-family:var(--mono);font-size:10.5px;color:var(--text2);}
+.n-row .buy{font-family:var(--mono);font-size:11px;text-align:right;white-space:nowrap;}
+.n-row.ok .buy{color:var(--green);} .n-row.short .buy{color:var(--yellow);} .n-row.missing .buy{color:var(--red);}
+.n-row.bought{opacity:.5;} .n-row.bought .nm b{text-decoration:line-through;}
+.n-row .check{--ring:var(--green);}
+.n-row .check.done{background:var(--green);border-color:var(--green);}
+.range{display:flex;gap:6px;margin-bottom:12px;}
+.k-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+.k-chips .chip{text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:12.5px;}
+.unit-row{display:grid;grid-template-columns:1fr 120px;gap:10px;}
+
 /* habit editor */
 .icons{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
 .icons span{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;
@@ -363,9 +405,23 @@
 
 <!-- ═════════ DIET ═════════ -->
 <div class="page scroll" id="page-diet">
-  <div class="topbar"><div><div class="greeting" id="diet-greet">Nutrition</div><div class="title" id="diet-title">Today's Plan</div></div></div>
+  <div class="topbar"><div class="tb-left">
+    <div class="icon-btn" id="fridge-btn" onclick="openKitchen()" aria-label="Kitchen">
+      <svg viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><path d="M5 10h14M8.5 6v1.5M8.5 13v3"/></svg>
+      <span class="badge" id="fridge-badge"></span></div>
+    <div><div class="greeting" id="diet-greet">Nutrition</div><div class="title" id="diet-title">Today's Plan</div></div></div></div>
   <div class="date-strip" id="date-strip"></div>
   <div id="diet-content"></div>
+</div>
+
+<!-- ═════════ KITCHEN ═════════ -->
+<div class="page scroll" id="page-kitchen">
+  <div class="topbar"><div class="tb-left">
+    <div class="icon-btn" onclick="switchPage('diet')" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></div>
+    <div><div class="greeting">Groceries at home</div><div class="title">Kitchen</div></div></div>
+    <button class="btn acc sm" onclick="openAddItem()">+ Add</button></div>
+  <div class="seg-tabs" id="k-tabs"><div data-t="stock" class="on">In stock</div><div data-t="needs">Needs</div><div data-t="shop">Shopping</div></div>
+  <div id="k-content"></div>
 </div>
 
 <!-- ═════════ PROGRESS ═════════ -->
@@ -415,8 +471,9 @@
     <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Coach</span></div>
 </nav>
 
-<script src="pace-ui.js?v=5"></script>
-<script src="nutrition.js?v=5"></script>
+<script src="pace-ui.js?v=6"></script>
+<script src="nutrition.js?v=6"></script>
+<script src="kitchen-core.js?v=6"></script>
 <script>
 (function () {
   const P = PACE, esc = P.esc, rest = P.rest, rpc = P.rpc, DAYS = P.DAYS, DS = P.DAYS_SHORT, MONTHS = P.MONTHS;
@@ -436,7 +493,7 @@
   let viewDOW = DOW, dietDate = new Date(NOW), sleepVal = 7;
   let currentPage = 'habits';
 
-  const ATH_COLS = 'id,name,phone,email,goal,current_weight,target_weight,height,age,dob,gender,workout_preference,diet_preference,workout_plan,diet_plan,habit_list,status,trainer_id,goal_date,created_at';
+  const ATH_COLS = 'id,name,phone,email,goal,current_weight,target_weight,height,age,dob,gender,workout_preference,diet_preference,workout_plan,diet_plan,habit_list,status,trainer_id,goal_date,created_at,kitchen_reminder';
 
   document.querySelectorAll('.page').forEach(p => Array.from(p.children).forEach((c, i) => c.style.setProperty('--i', i)));
 
@@ -467,11 +524,13 @@
     if (TODAY_LOG.sleep_hours) sleepVal = parseFloat(TODAY_LOG.sleep_hours);
 
     await normalizeHabits();
+    await loadPantry();
     renderAll();
     const ld = document.getElementById('app-loader'); ld.classList.add('hide'); setTimeout(() => ld.remove(), 450);
     refreshPush(true);
     pollUnread(); setInterval(pollUnread, 20000);
     if (location.hash === '#messages') switchPage('messages');
+    if (location.hash === '#kitchen') { switchPage('diet'); openKitchen('needs'); }
   }
 
   async function saveLog(patch) {
@@ -899,10 +958,11 @@
   window.toggleMeal = async function (i) {
     const log = logFor(dietDate);
     if (!log) { P.toast('No log for that day'); return; }
-    const dl = { ...(log.diet_log || {}) }; dl.eaten = { ...(dl.eaten || {}) };
+    const dl = { ...(log.diet_log || {}) }; dl.eaten = { ...(dl.eaten || {}) }; dl.taken = { ...(dl.taken || {}) };
     dl.eaten[i] = !dl.eaten[i]; if (!dl.eaten[i]) delete dl.eaten[i];
-    log.diet_log = dl;
     const m = dayPlan(dietDate).meals[i];
+    const kitchenMsg = dl.eaten[i] ? takeFromKitchen(m, dl, i) : putBackInKitchen(dl, i);
+    log.diet_log = dl;
     const prev = +(document.getElementById('kcal-mx')?.dataset.v || 0);
     renderDiet();
     const k = document.getElementById('kcal-mx'), to = +k.dataset.v;
@@ -911,6 +971,7 @@
     const chk = document.querySelector(`.meal[data-i="${i}"] .check`); if (chk) P.pulse(chk, 'pop');
     if (dl.eaten[i]) { P.floatText(k, `+${m.calories || 0} kcal`); if (navigator.vibrate) navigator.vibrate([10, 30, 10]); }
     else P.floatText(k, `−${m.calories || 0} kcal`, 'var(--text2)');
+    if (kitchenMsg) setTimeout(() => P.toast(kitchenMsg, dl.eaten[i] ? '' : 'success'), 350);
     try { await rest(`daily_logs?id=eq.${log.id}`, { method: 'PATCH', body: JSON.stringify({ diet_log: dl }) }); }
     catch (e) { P.toast('Could not save — check internet', 'error'); }
   };
@@ -957,6 +1018,254 @@
         ${['va', 'vc', 'vd', 'b12', 'fol'].map(nrow).join('')}</div>
       <div class="note">Calories and macros come from your plan. Fibre, sugar, vitamins and minerals are estimates from typical values for these foods (${Math.round(est.coverage * 100)}% of items matched) — actual amounts vary with brand and cooking.</div>`}
     `);
+  };
+
+  // ═════════ KITCHEN ═════════
+  const K = PaceKitchen;
+  let PANTRY = [], kitchenTab = 'stock', needsDays = 1, boughtNow = new Set();
+  const saveTimers = {};
+  async function loadPantry() {
+    try { PANTRY = await rest(`pantry_items?athlete_id=eq.${ATHLETE.id}&order=name.asc`) || []; } catch (e) { PANTRY = []; }
+    renderFridgeBadge();
+  }
+  const pItem = key => PANTRY.find(p => p.key === key);
+  function savePantry(p, immediate) {
+    clearTimeout(saveTimers[p.id]);
+    const go = () => rest(`pantry_items?id=eq.${p.id}`, { method: 'PATCH', body: JSON.stringify({ qty: p.qty, full_qty: p.full_qty, name: p.name, unit: p.unit, updated_at: new Date().toISOString() }) })
+      .catch(() => P.toast('Kitchen not saved — check internet', 'error'));
+    if (immediate) go(); else saveTimers[p.id] = setTimeout(go, 600);
+  }
+  async function addToKitchen(key, name, unit, category, amt) {
+    const ex = pItem(key);
+    if (ex) { ex.qty = +ex.qty + amt; ex.full_qty = Math.max(+ex.full_qty, ex.qty); savePantry(ex, true); return ex; }
+    const row = { athlete_id: ATHLETE.id, key, name, unit, category, qty: amt, full_qty: amt };
+    const temp = { ...row, id: 'tmp' + Date.now() }; PANTRY.push(temp);
+    try { const r = await rest('pantry_items', { method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify(row) }); Object.assign(temp, r[0]); }
+    catch (e) { PANTRY = PANTRY.filter(x => x !== temp); P.toast('Could not add — check internet', 'error'); }
+    return temp;
+  }
+  const label = (p, amt) => `${K.fmt(amt, p.unit)} ${p.name.toLowerCase()}`;
+
+  // Ticking a meal takes its ingredients out of the kitchen; un-ticking puts back exactly what was taken
+  function takeFromKitchen(meal, dl, i) {
+    const { need } = K.mealNeeds(meal, PANTRY), taken = {}, parts = [], low = [];
+    Object.entries(need).forEach(([key, amt]) => {
+      const p = pItem(key); if (!p || +p.qty <= 0) return;
+      const t = Math.min(+p.qty, amt); p.qty = Math.round((+p.qty - t) * 100) / 100; taken[p.id] = t;
+      parts.push('−' + label(p, t)); if (t < amt) low.push(p.name);
+      savePantry(p);
+    });
+    if (Object.keys(taken).length) dl.taken[i] = taken;
+    renderFridgeBadge();
+    if (!parts.length) return '';
+    return `Kitchen: ${parts.slice(0, 3).join(', ')}${parts.length > 3 ? ` +${parts.length - 3} more` : ''}${low.length ? ` · ran out of ${low.join(', ')}` : ''}`;
+  }
+  function putBackInKitchen(dl, i) {
+    const taken = dl.taken[i]; delete dl.taken[i];
+    if (!taken) return '';
+    const parts = [];
+    Object.entries(taken).forEach(([id, amt]) => { const p = PANTRY.find(x => x.id === id); if (!p) return; p.qty = +p.qty + amt; parts.push('+' + label(p, amt)); savePantry(p); });
+    renderFridgeBadge();
+    return parts.length ? `Back in kitchen: ${parts.slice(0, 3).join(', ')}${parts.length > 3 ? '…' : ''}` : '';
+  }
+
+  // Needs for the next N days starting tomorrow
+  function needsRange(days) {
+    const meals = [];
+    for (let d = 1; d <= days; d++) { const dt = new Date(NOW); dt.setDate(dt.getDate() + d); const pl = dayPlan(dt); if (pl && pl.meals) meals.push(...pl.meals); }
+    const r = K.needsForMeals(meals, PANTRY);
+    return { rows: K.compare(r.need, PANTRY), untracked: r.untracked };
+  }
+  function renderFridgeBadge() {
+    const b = document.getElementById('fridge-badge'); if (!b) return;
+    const n = Object.keys(ATHLETE.diet_plan || {}).length ? needsRange(1).rows.filter(r => r.status !== 'ok').length : 0;
+    b.textContent = n; b.classList.toggle('show', n > 0);
+  }
+
+  window.openKitchen = function (tab) { if (tab) kitchenTab = tab; switchPage('kitchen'); };
+  document.querySelectorAll('#k-tabs div').forEach(t => t.onclick = () => { kitchenTab = t.dataset.t; renderKitchen(); });
+
+  function renderKitchen() {
+    document.querySelectorAll('#k-tabs div').forEach(t => t.classList.toggle('on', t.dataset.t === kitchenTab));
+    const box = document.getElementById('k-content');
+    if (kitchenTab === 'stock') box.innerHTML = stockHTML();
+    else if (kitchenTab === 'needs') box.innerHTML = needsHTML();
+    else box.innerHTML = shopHTML();
+    box.querySelectorAll(':scope > *').forEach((c, i) => { c.style.setProperty('--i', i); c.style.animation = 'rise .45s cubic-bezier(.16,1,.3,1) both'; c.style.animationDelay = (i * 30) + 'ms'; });
+  }
+  const rangeChips = () => `<div class="range">${[[1, 'Tomorrow'], [3, 'Next 3 days'], [7, 'Week']].map(([d, l]) => `<span class="chip ${needsDays === d ? 'on' : ''}" onclick="setNeedsDays(${d})">${l}</span>`).join('')}</div>`;
+  window.setNeedsDays = d => { needsDays = d; renderKitchen(); };
+
+  function stockHTML() {
+    const soon = needsRange(2).rows;
+    const lowKeys = new Set(soon.filter(r => r.status !== 'ok').map(r => r.key));
+    const lowCount = PANTRY.filter(p => lowKeys.has(p.key)).length;
+    let html = `<section class="w"><div class="w-head"><span class="wl"><b>01</b>In stock</span><span class="wl" style="color:${lowCount ? 'var(--acc)' : 'var(--green)'}">${lowCount ? lowCount + ' running low' : 'all good'}</span></div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px">${P.matrix(PANTRY.filter(p => +p.qty > 0).length, 6.2)}
+      <div class="big-sub" style="text-align:right;line-height:1.6">items at home<br><span style="color:var(--text3)">ticking a meal takes them out</span></div></div></section>`;
+    if (!PANTRY.length) return html + P.empty('Your kitchen is empty', 'Tap <b style="color:var(--acc)">+ Add</b> and pick foods from your diet — then ticking meals keeps the count for you.');
+    const groups = {};
+    PANTRY.forEach(p => (groups[p.category] = groups[p.category] || []).push(p));
+    Object.keys(K.CATS).filter(c => groups[c]).forEach((c, gi) => {
+      html += `<div class="sec">${String(gi + 2).padStart(2, '0')} · ${K.CATS[c]}</div>`;
+      groups[c].sort((a, b) => a.name.localeCompare(b.name)).forEach(p => {
+        const low = lowKeys.has(p.key), fill = +p.full_qty > 0 ? Math.round(Math.min(1, +p.qty / +p.full_qty) * 10) : 0;
+        html += `<div class="k-row${low ? ' low' : ''}${+p.qty <= 0 ? ' empty-q' : ''}" data-id="${p.id}">
+          <div class="k-emo">${K.byKey[p.key]?.emoji || '🛒'}</div>
+          <div class="k-body" onclick="editItem('${p.id}')"><div class="k-name">${esc(p.name)}</div>
+            <div class="k-sub">${low ? '<span class="lowtag">● LOW FOR TOMORROW</span>' : +p.qty <= 0 ? 'out' : 'in stock'}</div>
+            <div class="k-fill">${P.pips(10, fill)}</div></div>
+          <div class="k-qty"><button onclick="bump('${p.id}',-1)">−</button><span class="q" id="q-${p.id}">${K.fmt(p.qty, p.unit)}</span><button onclick="bump('${p.id}',1)">+</button></div>
+        </div>`;
+      });
+    });
+    return html;
+  }
+  window.bump = function (id, dir) {
+    const p = PANTRY.find(x => x.id === id); if (!p) return;
+    p.qty = Math.max(0, Math.round((+p.qty + dir * K.step(p.unit)) * 100) / 100);
+    if (dir > 0) p.full_qty = Math.max(+p.full_qty, p.qty);
+    const q = document.getElementById('q-' + id); if (q) { q.textContent = K.fmt(p.qty, p.unit); P.pulse(q); }
+    const row = document.querySelector(`.k-row[data-id="${id}"] .k-fill`);
+    if (row) row.innerHTML = P.pips(10, +p.full_qty > 0 ? Math.round(Math.min(1, p.qty / p.full_qty) * 10) : 0);
+    if (navigator.vibrate) navigator.vibrate(6);
+    savePantry(p); renderFridgeBadge();
+  };
+
+  function needsHTML() {
+    const { rows, untracked } = needsRange(needsDays);
+    const toBuy = rows.filter(r => r.status !== 'ok').length;
+    const from = new Date(NOW); from.setDate(from.getDate() + 1);
+    const to = new Date(NOW); to.setDate(to.getDate() + needsDays);
+    const span = needsDays === 1 ? `${DAYS[from.getDay()]} ${from.getDate()} ${MONTHS[from.getMonth()]}` : `${from.getDate()} ${MONTHS[from.getMonth()]} – ${to.getDate()} ${MONTHS[to.getMonth()]}`;
+    let html = rangeChips() + `<section class="w"><div class="w-head"><span class="wl"><b>01</b>${span}</span><span class="wl">${rows.length} ingredients</span></div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px">
+        <div style="color:${toBuy ? 'var(--acc)' : 'var(--green)'}">${P.matrix(toBuy, 6.2)}</div>
+        <div class="big-sub" style="text-align:right;line-height:1.6">${toBuy ? 'things to buy' : 'you have everything ✓'}<br><span style="color:var(--text3)">${rows.length - toBuy} ready at home</span></div></div>
+      <div class="pips ${toBuy ? 'acc' : 'green'} sweep" style="margin-top:14px">${P.pips(Math.max(rows.length, 1), rows.length - toBuy)}</div>
+      ${toBuy ? `<button class="btn acc" style="margin-top:16px" onclick="kitchenTab='shop';renderKitchen()">Open shopping list →</button>` : ''}</section>`;
+    if (!rows.length) return html + P.empty('No meal plan for these days');
+    html += `<div class="sec">02 · Ingredients</div>` + rows.map(r => `<div class="n-row ${r.status}">
+      <div class="st">${r.status === 'ok' ? '✓' : r.status === 'short' ? '!' : '✕'}</div>
+      <div class="nm"><b>${r.emoji} ${esc(r.name)}</b><span>need ${K.fmt(r.need, r.unit)} · have ${K.fmt(r.have, r.unit)}</span></div>
+      <div class="buy">${r.status === 'ok' ? 'READY' : 'BUY ' + K.fmt(K.buyAmount(r.short, r.unit), r.unit)}</div></div>`).join('');
+    if (untracked.length) html += `<div class="note">Not counted (made fresh / no fixed amount): ${esc(untracked.slice(0, 8).join(', '))}${untracked.length > 8 ? '…' : ''}</div>`;
+    return html;
+  }
+
+  function shopList() { return needsRange(needsDays).rows.filter(r => r.status !== 'ok' || boughtNow.has(r.key)); }
+  function shopHTML() {
+    const list = shopList();
+    const kr = ATHLETE.kitchen_reminder || { on: true, time: '16:00' };
+    let html = rangeChips();
+    if (!list.length) html += `<section class="w" style="text-align:center"><div style="color:var(--green);display:flex;justify-content:center;margin:6px 0 12px">${P.matrix(0, 6)}</div>
+      <div class="hero-title" style="font-size:18px">Nothing to buy</div><div class="hero-note" style="margin:0">Your kitchen covers ${needsDays === 1 ? "tomorrow's" : 'these'} meals.</div></section>`;
+    else {
+      html += `<section class="w"><div class="w-head"><span class="wl"><b>01</b>Shopping list</span><span class="wl">${list.filter(r => !boughtNow.has(r.key)).length} left</span></div>
+        <div class="note" style="margin:0 0 4px">Tick items as you buy them — they go straight into your kitchen.</div></section>`;
+      html += list.map(r => { const b = boughtNow.has(r.key), amt = K.buyAmount(r.short, r.unit) || K.buyAmount(r.need, r.unit);
+        return `<div class="n-row ${b ? 'ok bought' : r.status}" data-k="${r.key}">
+          <div class="check${b ? ' done' : ''}" onclick="${b ? '' : `boughtItem('${r.key}')`}">${b ? '✓' : ''}</div>
+          <div class="nm"><b>${r.emoji} ${esc(r.name)}</b><span>${b ? 'added to kitchen' : `short ${K.fmt(r.short, r.unit)} · have ${K.fmt(r.have, r.unit)}`}</span></div>
+          <div class="buy">${b ? 'IN KITCHEN' : K.fmt(amt, r.unit)}</div></div>`; }).join('');
+      html += `<button class="btn ghost" style="margin-top:6px" onclick="shareList()">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#25D366"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.4-.7-2.8-1.1-4.6-4-4.8-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.7 1.2 1.6 1.9 1.1 1 2 1.3 2.3 1.4.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.1.1.7-.1 1.3z"/></svg>
+        Share list on WhatsApp</button>`;
+    }
+    html += `<div class="sec">Daily kitchen check</div>
+      <div class="w"><div class="set-row" style="padding-top:0"><div><div class="t">Remind me what to buy</div><div class="s">Only if something for tomorrow's meals is missing</div></div>
+        <div class="switch ${kr.on ? 'on' : ''}" onclick="setKitchenReminder(!this.classList.contains('on'), null)"></div></div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:14px;${kr.on ? '' : 'opacity:.4;pointer-events:none'}">
+          <span class="mono muted" style="font-size:11px;letter-spacing:1px">TIME</span>
+          <input class="input" type="time" value="${kr.time || '16:00'}" onchange="setKitchenReminder(true, this.value)" style="flex:1"></div>
+        ${kr.on && !pushOn() ? `<button class="btn acc" style="margin-top:14px" onclick="askReminders()">Turn on notifications</button>` : ''}</div>`;
+    return html;
+  }
+  window.boughtItem = async function (key) {
+    const r = needsRange(needsDays).rows.find(x => x.key === key); if (!r) return;
+    const amt = K.buyAmount(r.short, r.unit) || K.buyAmount(r.need, r.unit);
+    const cat = K.byKey[key]?.cat || r.cat || 'other';
+    boughtNow.add(key);
+    const row = document.querySelector(`.n-row[data-k="${key}"] .check`); if (row) { row.classList.add('done'); row.textContent = '✓'; P.pulse(row, 'pop'); }
+    if (navigator.vibrate) navigator.vibrate(10);
+    await addToKitchen(key, r.name, r.unit, cat, amt);
+    P.toast(`+${K.fmt(amt, r.unit)} ${r.name.toLowerCase()} in kitchen`, 'success');
+    renderFridgeBadge(); setTimeout(renderKitchen, 450);
+  };
+  window.shareList = function () {
+    const list = shopList().filter(r => !boughtNow.has(r.key));
+    const when = needsDays === 1 ? 'tomorrow' : needsDays === 3 ? 'next 3 days' : 'this week';
+    const txt = `🛒 PACE shopping list (${when})\n\n` + list.map(r => `• ${r.name} — ${K.fmt(K.buyAmount(r.short, r.unit) || K.buyAmount(r.need, r.unit), r.unit)}`).join('\n');
+    window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
+  };
+  window.setKitchenReminder = async function (on, time) {
+    const kr = { ...(ATHLETE.kitchen_reminder || { on: true, time: '16:00' }) };
+    kr.on = on; if (time) kr.time = time;
+    await saveAthlete({ kitchen_reminder: kr });
+    P.toast(kr.on ? `Kitchen check at ${P.fmt12(kr.time)} 🔔` : 'Kitchen check off', kr.on ? 'success' : '');
+    renderKitchen();
+  };
+
+  // ── add / edit items
+  const UNITS = [['pcs', 'pieces'], ['g', 'grams'], ['kg', 'kg'], ['ml', 'ml'], ['L', 'litres'], ['scoop', 'scoops'], ['sachet', 'sachets'], ['slice', 'slices'], ['packet', 'packets']];
+  const toBase = (v, u) => u === 'kg' ? [v * 1000, 'g'] : u === 'L' ? [v * 1000, 'ml'] : [v, u];
+  const niceUnit = (amt, u) => u === 'g' && amt >= 1000 ? 'kg' : u === 'ml' && amt >= 1000 ? 'L' : u;
+  window.openAddItem = function (preset) {
+    const week = needsRange(7).rows.map(r => r.key);
+    const suggest = [...new Set(week)].filter(k => K.byKey[k]).slice(0, 18);
+    let sel = preset ? K.byKey[preset] : null;
+    const sh = P.openSheet(`<div class="sheet-title">Add to kitchen</div><div class="sheet-sub">What did you buy? It adds to what you already have.</div>
+      ${suggest.length ? `<label class="label">From your diet plan</label><div class="k-chips" id="ai-chips">${suggest.map(k => `<span class="chip ${pItem(k) ? '' : ''}" data-k="${k}">${K.byKey[k].emoji} ${K.byKey[k].name}${pItem(k) ? ' ✓' : ''}</span>`).join('')}</div>` : ''}
+      <div class="field"><label class="label">Item</label><input class="input" id="ai-name" placeholder="e.g. Banana, Makhana, Coffee" list="ai-list" autocomplete="off">
+        <datalist id="ai-list">${K.CATALOG.filter((c, i, a) => a.findIndex(x => x.key === c.key) === i).map(c => `<option value="${c.name}">`).join('')}</datalist></div>
+      <div class="unit-row"><div class="field"><label class="label">How much</label><input class="input" type="number" inputmode="decimal" id="ai-qty" placeholder="6"></div>
+        <div class="field"><label class="label">Unit</label><select class="input" id="ai-unit">${UNITS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select></div></div>
+      <button class="btn acc" id="ai-go">Add to kitchen</button>`);
+    const name = sh.querySelector('#ai-name'), qty = sh.querySelector('#ai-qty'), unit = sh.querySelector('#ai-unit');
+    const pick = e => {
+      sel = e; name.value = e.name; const ex = pItem(e.key);
+      unit.value = ex ? niceUnit(+ex.qty, ex.unit) === 'kg' || niceUnit(+ex.qty, ex.unit) === 'L' ? niceUnit(+ex.qty, ex.unit) : ex.unit : e.unit === 'g' && e.def >= 50 && e.cat === 'grains' ? 'kg' : e.unit;
+      sh.querySelectorAll('#ai-chips .chip').forEach(c => c.classList.toggle('on', c.dataset.k === e.key)); qty.focus();
+    };
+    sh.querySelectorAll('#ai-chips .chip').forEach(c => c.onclick = () => pick(K.byKey[c.dataset.k]));
+    name.addEventListener('change', () => { const e = K.CATALOG.find(c => c.name.toLowerCase() === name.value.trim().toLowerCase()); if (e) pick(e); else sel = null; });
+    if (sel) pick(sel);
+    sh.querySelector('#ai-go').onclick = async () => {
+      const n = name.value.trim(), q = parseFloat(qty.value);
+      if (!n) return P.toast('Type what you bought', 'error');
+      if (!q || q <= 0) return P.toast('Enter how much', 'error');
+      const [amt, base] = toBase(q, unit.value);
+      const e = sel && sel.name.toLowerCase() === n.toLowerCase() ? sel : K.CATALOG.find(c => c.name.toLowerCase() === n.toLowerCase());
+      const key = e ? e.key : 'c:' + n.toLowerCase().replace(/\s+/g, '_');
+      const ex = pItem(key);
+      if (ex && ex.unit !== base) return P.toast(`${ex.name} is counted in ${ex.unit} — use that unit`, 'error');
+      P.closeSheet();
+      await addToKitchen(key, e ? e.name : n.replace(/^./, c => c.toUpperCase()), base, e ? e.cat : 'other', amt);
+      P.toast(`+${K.fmt(amt, base)} ${n.toLowerCase()} in kitchen`, 'success');
+      kitchenTab = 'stock'; renderKitchen(); renderFridgeBadge();
+      const row = document.querySelector(`.k-row[data-id="${pItem(key)?.id}"]`); if (row) P.pulse(row, 'glow');
+    };
+  };
+  window.editItem = function (id) {
+    const p = PANTRY.find(x => x.id === id); if (!p) return;
+    const u = niceUnit(+p.qty, p.unit), shown = u === 'kg' || u === 'L' ? +p.qty / 1000 : +p.qty;
+    const units = p.unit === 'g' ? [['g', 'grams'], ['kg', 'kg']] : p.unit === 'ml' ? [['ml', 'ml'], ['L', 'litres']] : [[p.unit, p.unit]];
+    const sh = P.openSheet(`<div class="sheet-title">${K.byKey[p.key]?.emoji || '🛒'} ${esc(p.name)}</div><div class="sheet-sub">Set exactly how much you have now.</div>
+      <div class="unit-row"><div class="field"><label class="label">Amount</label><input class="input" type="number" inputmode="decimal" id="ei-qty" value="${Math.round(shown * 100) / 100}"></div>
+        <div class="field"><label class="label">Unit</label><select class="input" id="ei-unit">${units.map(([v, l]) => `<option value="${v}" ${v === u ? 'selected' : ''}>${l}</option>`).join('')}</select></div></div>
+      <button class="btn acc" id="ei-save">Save</button>
+      <button class="btn danger" id="ei-del" style="margin-top:10px">Remove from kitchen</button>`);
+    sh.querySelector('#ei-save').onclick = () => {
+      const q = parseFloat(sh.querySelector('#ei-qty').value); if (isNaN(q) || q < 0) return P.toast('Enter an amount', 'error');
+      const [amt] = toBase(q, sh.querySelector('#ei-unit').value);
+      p.qty = amt; if (amt > +p.full_qty || amt === 0) p.full_qty = Math.max(amt, +p.full_qty && amt ? +p.full_qty : amt);
+      savePantry(p, true); P.closeSheet(); renderKitchen(); renderFridgeBadge();
+    };
+    sh.querySelector('#ei-del').onclick = async () => {
+      if (!confirm(`Remove ${p.name} from your kitchen?`)) return;
+      P.closeSheet(); PANTRY = PANTRY.filter(x => x !== p); renderKitchen(); renderFridgeBadge();
+      rest(`pantry_items?id=eq.${p.id}`, { method: 'DELETE' }).catch(() => P.toast('Could not remove', 'error'));
+    };
   };
 
   // ═════════ PROGRESS ═════════
@@ -1320,19 +1629,20 @@
   window.switchPage = function (name) {
     const next = document.getElementById('page-' + name), cur = document.querySelector('.page.active');
     if (cur === next) { next.scrollTo({ top: 0, behavior: 'smooth' }); return; }
-    document.querySelectorAll('.dock-item').forEach(d => d.classList.toggle('active', d.dataset.page === name));
+    document.querySelectorAll('.dock-item').forEach(d => d.classList.toggle('active', d.dataset.page === (name === 'kitchen' ? 'diet' : name)));
     cur && cur.classList.remove('active');
     next.scrollTop = 0; next.classList.add('active');
     currentPage = name;
     document.getElementById('composer').classList.toggle('show', name === 'messages');
     clearInterval(chatTimer);
     if (name === 'messages') { sizeComposer(); loadMessages(true); chatTimer = setInterval(() => loadMessages(false), 5000); }
-    if (name === 'diet') { renderDiet(); requestAnimationFrame(() => centerStrip(false)); }
+    if (name === 'diet') { renderDiet(); renderFridgeBadge(); requestAnimationFrame(() => centerStrip(false)); }
+    if (name === 'kitchen') renderKitchen();
     if (name === 'habits') renderHabitsPage();
     if (name === 'progress') renderProgress();
     if (navigator.vibrate) navigator.vibrate(6);
   };
-  navigator.serviceWorker?.addEventListener('message', e => { if (e.data && e.data.type === 'open') switchPage('habits'); });
+  navigator.serviceWorker?.addEventListener('message', e => { if (e.data && e.data.type === 'open') { if (String(e.data.url).includes('#kitchen')) { switchPage('diet'); openKitchen('needs'); } else switchPage('habits'); } });
 
   init();
 })();
