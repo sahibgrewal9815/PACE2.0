@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="pace-ui.css?v=6">
+<link rel="stylesheet" href="pace-ui.css?v=7">
 <style>
 /* ── pages ── */
 .page{display:none;padding:calc(var(--safe-top) + 18px) 16px calc(var(--safe-bot) + 110px);}
@@ -273,6 +273,27 @@
 .act-react span.on{background:var(--acc-dim);}
 .act-list .btn{justify-content:flex-start;margin-bottom:8px;font-weight:600;}
 
+/* train (diet-style, orange only) */
+.seg i.on-acc{background:var(--acc);}
+.trow{display:grid;grid-template-columns:30px 1fr 62px;align-items:center;gap:10px;margin-top:9px;}
+.trow .tl{font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--acc);}
+.trow .tv{font-family:var(--mono);font-size:10.5px;color:var(--text2);text-align:right;}
+.tbar{display:grid;grid-template-columns:repeat(20,1fr);gap:3px;}
+.tbar i{height:7px;border-radius:2px;background:rgba(255,255,255,.07);}
+.tbar i.on{background:var(--acc);}
+.sec .sec-count{order:3;font-size:10px;color:var(--text2);letter-spacing:1px;}
+.tl-orange .exi{position:relative;}
+.tl-orange .exi::before{content:'';position:absolute;left:-18px;top:24px;width:9px;height:9px;border-radius:50%;background:var(--bg);border:1.5px solid var(--text3);}
+.tl-orange .exi.done::before{background:var(--acc);border-color:var(--acc);}
+.tl-orange .exi.next::before{background:var(--acc);border-color:var(--acc);color:var(--acc);box-shadow:0 0 10px var(--acc);animation:breathe 2s ease-in-out infinite;}
+.tl-orange .exi .w{padding:15px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;}
+.tl-orange .exi.done .w,.tl-orange .exi.next .w{border-color:var(--acc-line);}
+.tl-orange .exi.done .meal-name{color:var(--text2);}
+.tl-orange .exi .check{margin-top:2px;}
+.mc.o{border-color:var(--acc);color:var(--acc);}
+.mc.o2{border-color:rgba(255,90,54,.35);color:rgba(255,140,110,.9);}
+.mc.o3{border-color:var(--acc-line);color:var(--acc);background:var(--acc-dim);}
+
 /* kitchen */
 .icon-btn{width:44px;height:44px;border-radius:14px;flex-shrink:0;background:var(--card2);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;
   cursor:pointer;position:relative;color:var(--text);}
@@ -471,9 +492,10 @@
     <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Coach</span></div>
 </nav>
 
-<script src="pace-ui.js?v=6"></script>
-<script src="nutrition.js?v=6"></script>
-<script src="kitchen-core.js?v=6"></script>
+<script src="pace-ui.js?v=7"></script>
+<script src="nutrition.js?v=7"></script>
+<script src="kitchen-core.js?v=7"></script>
+<script src="train-core.js?v=7"></script>
 <script>
 (function () {
   const P = PACE, esc = P.esc, rest = P.rest, rpc = P.rpc, DAYS = P.DAYS, DS = P.DAYS_SHORT, MONTHS = P.MONTHS;
@@ -805,15 +827,18 @@
   })();
 
   // ═════════ SESSION CARD ═════════
+  const T = PaceTrain;
+  const bodyKg = () => { const l = LOGS.find(x => x.weight); return +(l && l.weight) || +ATHLETE.current_weight || 70; };
   function renderSession() {
     const w = (ATHLETE.workout_plan || {})[String(DOW)];
     document.getElementById('home-day-label').textContent = DAYS[DOW];
     if (w && w.exercises && w.exercises.length) {
-      const done = Object.values(TODAY_LOG.habits.done_exercises || {}).filter(Boolean).length;
+      const s = T.session(w.exercises, bodyKg(), TODAY_LOG.habits.done_exercises || {});
       document.getElementById('home-workout-title').textContent = w.title || 'Training';
       document.getElementById('home-workout-note').textContent = w.note || '';
       P.setMx('home-ex-count', String(w.exercises.length).padStart(2, '0'), 6.5);
-      document.getElementById('home-workout-tags').innerHTML = `<span class="tag on">${done}/${w.exercises.length} done</span>` + (w.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join('');
+      document.getElementById('home-workout-tags').innerHTML = `<span class="tag on">${s.done}/${w.exercises.length} done</span><span class="tag on">🔥 ${s.burned}/${s.kcal} kcal</span><span class="tag">~${s.minutes} min</span>`
+        + s.byType.map(g => `<span class="tag">${g.label} ${g.total}</span>`).join('');
     } else {
       document.getElementById('home-workout-title').textContent = 'Rest Day';
       document.getElementById('home-workout-note').textContent = 'Recovery is part of training.';
@@ -840,38 +865,76 @@
       return;
     }
     const doneMap = isToday ? (TODAY_LOG.habits.done_exercises || {}) : {};
-    const n = w.exercises.length, done = w.exercises.filter((_, i) => doneMap[i]).length;
-    box.innerHTML = `<section class="w">
-        <div class="w-head"><span class="wl"><b>${DS[viewDOW].toUpperCase()}</b>${isToday ? 'Today · Session' : 'Preview'}</span>
-        <span class="wl" id="wk-count">${isToday ? `${done}/${n} done` : `${n} exercises`}</span></div>
-        <div class="hero-title">${esc(w.title)}</div>
-        ${w.note ? `<div class="hero-note">${esc(w.note)}</div>` : ''}
-        <div class="tags">${(w.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
-        ${isToday ? `<div class="pips acc sweep" id="wk-pips" style="margin-top:16px">${P.pips(n, done)}</div>` : ''}
-      </section>` + w.exercises.map((ex, i) => {
-        const d = !!doneMap[i];
-        return `<div class="row${d ? ' done' : ''}" id="ex-${i}">
-          <div class="ex-num">${String(i + 1).padStart(2, '0')}</div>
-          <div class="row-body" style="cursor:default"><div class="row-name">${esc(ex.name)}</div>
-            <div class="row-meta">${esc(ex.sets || '')}${ex.reps ? ' × ' + esc(ex.reps) : ''}${ex.rest ? ' · ' + esc(ex.rest) : ''}</div></div>
-          ${isToday ? `<div class="check${d ? ' done' : ''}" onclick="toggleExercise(${i})">${d ? '✓' : ''}</div>` : '<div class="check locked"></div>'}
-        </div>`;
-      }).join('');
+    const s = T.session(w.exercises, bodyKg(), doneMap);
+    const showBurn = isToday;
+    const lit = Math.round(Math.min(1, s.burned / (s.kcal || 1)) * 30);
+    let html = `<section class="w tap" id="burn-card" onclick="openBurn()">
+      <div class="w-head"><span class="wl"><b>01</b>${showBurn ? 'Calories burned' : 'Planned burn'}</span><span class="wl">${esc(w.title || 'Session')}</span></div>
+      <div class="kcal-row"><div id="burn-mx" data-v="${showBurn ? s.burned : s.kcal}" style="color:var(--acc)">${P.matrix(showBurn ? s.burned : s.kcal, 7)}</div>
+        <div class="of">${showBurn ? `of ~${s.kcal} kcal<br>${s.done}/${s.list.length} done` : `kcal · ~${s.minutes} min<br>${s.list.length} exercises`}</div></div>
+      ${showBurn ? `<div class="seg sweep" style="grid-template-columns:repeat(30,1fr)">${Array.from({ length: 30 }, (_, i) => `<i class="${i < lit - 1 ? 'on-acc' : i === lit - 1 ? 'edge' : ''}" style="--k:${i}"></i>`).join('')}</div>` : ''}
+      ${s.byType.map(g => `<div class="trow"><span class="tl">${g.short}</span><div class="tbar sweep">${P.pips(20, Math.round((showBurn ? g.done / g.total : g.kcal / (s.kcal || 1)) * 20))}</div>
+        <span class="tv">${showBurn ? `${g.done}/${g.total}` : `${g.kcal} kcal`}</span></div>`).join('')}
+      <div class="more"><span>${showBurn ? `~${s.minutes} MIN · TICK AS YOU GO` : 'PREVIEW · ' + DAYS[viewDOW].toUpperCase()}</span><b>BREAKDOWN ›</b></div>
+    </section>`;
+    const nextI = isToday ? s.list.findIndex(x => !x.done) : -1;
+    let sec = 2;
+    s.byType.forEach(g => {
+      html += `<div class="sec">${String(sec++).padStart(2, '0')} · ${g.label}<span class="sec-count">${isToday ? `${g.done}/${g.total}` : g.total} · ${g.kcal} kcal</span></div><div class="timeline tl-orange">`;
+      g.items.forEach(x => {
+        const d = T.describe(x.ex), st = x.done ? 'done' : x.i === nextI ? 'next' : '';
+        html += `<div class="exi ${st}" id="ex-${x.i}"><div class="w">
+          <div class="meal-main">
+            <div class="meal-top"><div style="display:flex;align-items:center;min-width:0"><span class="meal-name">${esc(x.ex.name)}</span>
+              ${x.done ? '<span class="badge-s next">DONE</span>' : x.i === nextI ? '<span class="badge-s next">UP NEXT</span>' : ''}</div>
+              <span class="meal-time">~${Math.max(1, Math.round(x.min))} MIN</span></div>
+            <div class="meal-items">${esc(x.muscle)}${x.ex.note ? ' · ' + esc(x.ex.note) : ''}</div>
+            <div class="meal-macros">
+              ${d.setsReps ? `<span class="mc o">${esc(d.setsReps)}</span>` : ''}${d.rest ? `<span class="mc o2">${esc(d.rest)} rest</span>` : ''}
+              <span class="mc o3">🔥 ${x.kcal} kcal</span>
+            </div>
+          </div>
+          ${isToday ? `<div class="check${x.done ? ' done' : ''}" onclick="toggleExercise(${x.i})">${x.done ? '✓' : ''}</div>` : '<div class="check locked"></div>'}
+        </div></div>`;
+      });
+      html += '</div>';
+    });
+    box.innerHTML = html;
   }
   window.switchWorkoutDay = d => { viewDOW = d; renderWorkout(); };
   window.toggleExercise = function (i) {
     const h = { ...TODAY_LOG.habits }; h.done_exercises = { ...(h.done_exercises || {}) };
-    h.done_exercises[i] = !h.done_exercises[i];
+    h.done_exercises[i] = !h.done_exercises[i]; if (!h.done_exercises[i]) delete h.done_exercises[i];
     saveLog({ habits: h });
     addXP(h.done_exercises[i] ? 15 : -15);
-    const w = (ATHLETE.workout_plan || {})[String(DOW)], n = w.exercises.length;
-    const done = w.exercises.filter((_, k) => h.done_exercises[k]).length;
+    const w = (ATHLETE.workout_plan || {})[String(DOW)];
+    const ex = w.exercises[i], kc = T.kcal(ex, bodyKg());
+    const prev = +(document.getElementById('burn-mx')?.dataset.v || 0);
     renderWorkout(); renderSession();
-    P.pulse(document.querySelector(`#ex-${i} .check`), 'pop'); P.pulse('wk-count');
+    const b = document.getElementById('burn-mx'), to = +b.dataset.v;
+    P.setMx(b, prev, 7); P.countMx(b, to, 7);
+    P.pulse('burn-card', 'glow');
+    const chk = document.querySelector(`#ex-${i} .check`); P.pulse(chk, 'pop');
     if (h.done_exercises[i]) {
-      P.floatText(document.querySelector(`#ex-${i} .check`), '+15 XP');
-      if (done === n) { P.toast('Session complete 🔥', 'success'); document.querySelectorAll('#wk-pips i').forEach(d => P.pulse(d, 'pop')); }
-    }
+      P.floatText(b, `+${kc} kcal`); P.floatText(chk, '+15 XP');
+      if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
+      const s = T.session(w.exercises, bodyKg(), h.done_exercises);
+      if (s.done === s.list.length) setTimeout(() => P.toast(`Session complete 🔥 ~${s.burned} kcal burned`, 'success'), 500);
+    } else P.floatText(b, `−${kc} kcal`, 'var(--text2)');
+  };
+  window.openBurn = function () {
+    const w = (ATHLETE.workout_plan || {})[String(viewDOW)]; if (!w) return;
+    const isToday = viewDOW === DOW, kg = bodyKg();
+    const s = T.session(w.exercises, kg, isToday ? (TODAY_LOG.habits.done_exercises || {}) : {});
+    P.openSheet(`<div class="sheet-title">Calories breakdown</div>
+      <div class="sheet-sub">${esc(w.title || 'Session')} · ${DAYS[viewDOW]} · based on ${kg} kg body weight</div>
+      <div class="w"><div class="w-head"><span class="wl"><b>01</b>${isToday ? 'Burned so far' : 'Planned'}</span><span class="wl">~${s.minutes} min</span></div>
+        <div style="color:var(--acc);margin-bottom:8px">${P.matrix(isToday ? s.burned : s.kcal, 6)}</div>
+        <div class="split">${s.byType.map((g, k) => `<i style="flex:${g.kcal};background:var(--acc);opacity:${1 - k * .18}"></i>`).join('')}</div>
+        <div class="legend" style="flex-wrap:wrap;gap:6px 12px">${s.byType.map((g, k) => `<span style="color:var(--acc);opacity:${1 - k * .18}">${g.label} ${g.kcal}</span>`).join('')}</div></div>
+      ${s.byType.map((g, k) => `<div class="w"><div class="w-head"><span class="wl"><b>${String(k + 2).padStart(2, '0')}</b>${g.label}</span><span class="wl">${g.kcal} kcal · ${Math.round(g.min)} min</span></div>
+        ${g.items.map(x => `<div class="nrow"><div class="nl" style="${x.done ? 'color:var(--acc)' : ''}">${x.done ? '✓ ' : ''}${esc(x.ex.name)}</div><div class="nv">${x.kcal} kcal · ${Math.max(1, Math.round(x.min))} min</div></div>`).join('')}</div>`).join('')}
+      <div class="note">Estimated with the standard MET method (exercise intensity × your weight × time, rest between sets counted as light activity). Real burn depends on how heavy and how fast you train — treat it as a guide.</div>`);
   };
 
   // ═════════ DIET ═════════
@@ -1302,6 +1365,8 @@
     const sleeps = days7.map(d => +logOf(d).sleep_hours || 0);
     const waters = days7.map(d => Math.round((logOf(d).water_ml || 0) / 250));
     const avg = a => { const x = a.filter(Boolean); return x.length ? x.reduce((s, v) => s + v, 0) / x.length : 0; };
+    const weekBurn = days7.reduce((sum, d) => { const w = (ATHLETE.workout_plan || {})[String(d.getDay())], dm = (logOf(d).habits || {}).done_exercises;
+      return sum + (w && w.exercises && dm ? T.session(w.exercises, bodyKg(), dm).burned : 0); }, 0);
     const workouts = days7.filter(d => Object.values((logOf(d).habits || {}).done_exercises || {}).some(Boolean)).length;
     const planDays = Object.values(ATHLETE.workout_plan || {}).filter(p => p && p.exercises && p.exercises.length).length || 5;
 
@@ -1364,7 +1429,7 @@
 
       <div class="grid2">
         <div class="w acc"><div class="w-head"><span class="wl"><b>08</b>Workouts</span></div>
-          <div class="s-val acc">${P.matrix(`${workouts}/${planDays}`, 5)}</div><div class="s-unit">sessions this week</div>
+          <div class="s-val acc">${P.matrix(`${workouts}/${planDays}`, 5)}</div><div class="s-unit">sessions · 🔥 ${weekBurn} kcal</div>
           <div class="pips acc sweep" style="margin-top:14px">${P.pips(planDays, workouts)}</div></div>
         <div class="w"><div class="w-head"><span class="wl"><b>09</b>BMI</span></div>
           <div class="s-val">${P.matrix(bmi ? bmi.toFixed(1) : '—', 5)}</div><div class="s-unit">${bmiCat || 'needs height'}</div>
